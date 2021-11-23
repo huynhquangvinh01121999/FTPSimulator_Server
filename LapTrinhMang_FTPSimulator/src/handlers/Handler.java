@@ -26,25 +26,27 @@ public class Handler extends HandleBase {
     private String destinationPath = "/Users/HP/Desktop/test1/";
 
     @Override
-    public void handleRequest(ObjectRequest request) {
+    public void handleRequest(String[] data) {
+
+        String message = data[0];
+
 //        System.out.println(message);
 //        String[] command = message.split(";");
 //        message = command[0].toString();
-        String message = request.getMessage();
-
+//        String message = request.getMessage();
         switch (message.toUpperCase()) {
             case "DOWNLOAD_FILE": {
-                System.out.println("Client đòi " + message);
-                FileDownloadInfo fileDownloadInfo = (FileDownloadInfo) request.getObject();
-                listenThread.responseDownloadFile("accept_download_file", fileDownloadInfo);
-                break;
+//                System.out.println("Client đòi " + message);
+//                FileDownloadInfo fileDownloadInfo = (FileDownloadInfo) request.getObject();
+//                listenThread.responseDownloadFile("accept_download_file", fileDownloadInfo);
+//                break;
             }
             case "UPLOAD_FILE": {
-                System.out.println("Client[port " + listenThread.getSocket().getPort() + "] said: " + message);
-                Files filesInfo = (Files) request.getObject();
-                FileEvent fileEvent = (FileEvent) request.getFileUpload();
-                new FileBLL().insertNewFile(filesInfo);
-                listenThread.saveFile(fileEvent);
+//                System.out.println("Client[port " + listenThread.getSocket().getPort() + "] said: " + message);
+//                Files filesInfo = (Files) request.getObject();
+//                FileEvent fileEvent = (FileEvent) request.getFileUpload();
+//                new FileBLL().insertNewFile(filesInfo);
+//                listenThread.saveFile(fileEvent);
 
 //                try {
 //                    new FileBLL().insertNewFile(listenThread.FileSaver());
@@ -60,19 +62,32 @@ public class Handler extends HandleBase {
 
             // bắn thông báo về cho client bằng id or email
             case "NOTIFICATION": {
-                System.out.println("Client[port " + listenThread.getSocket().getPort() + "] said: " + message);
-                String email = (String) request.getObject();
-                listenThread.notification(email);
+//                System.out.println("Client[port " + listenThread.getSocket().getPort() + "] said: " + message);
+//                String email = (String) request.getObject();
+//                listenThread.notification(email);
                 break;
             }
 
             // CASE ĐĂNG KÝ
             case "VERIFY_REGISTER": {
                 System.out.println("Client[port " + listenThread.getSocket().getPort() + "] said: " + message);
-                Users user = (Users) request.getObject();
-                HandleResult result = HandleVerify.verifyRegisterUser(user);
-                listenThread.response("response_verify_register", result);
+                Users user = new Users();
+                user.setEmail(data[1]);
+                user.setPassword(data[2]);
+                user.setFullName(data[3]);
+                HandleResult handleResult = HandleVerify.verifyRegisterUser(user);
+                String result = "response_verify_register"
+                        + ";" + String.valueOf(handleResult.isSuccessed())
+                        + ";" + handleResult.getMessage()
+                        + ";" + String.valueOf(handleResult.getValue());
+                System.out.println(result);
+                listenThread.response(result);
 
+                // version_2
+//                Users user = (Users) request.getObject();
+//                HandleResult result = HandleVerify.verifyRegisterUser(user);
+//                listenThread.response("response_verify_register", result);
+                // version_1
 //                Users user = listenThread.getObjectUser();
 //                HandleResult result = HandleVerify.verifyRegisterUser(user);
 //                listenThread.sendMessage("response_verify_register");
@@ -80,12 +95,13 @@ public class Handler extends HandleBase {
                 break;
             }
             case "REGISTER": {
-                System.out.println("Client[port " + listenThread.getSocket().getPort() + "] said: " + message);
+//                System.out.println("Client[port " + listenThread.getSocket().getPort() + "] said: " + message);
+//
+//                Users user = (Users) request.getObject();
+//                HandleResult result = new UserBLL().registerUser(user);
+//                listenThread.response("response_register", result);
 
-                Users user = (Users) request.getObject();
-                HandleResult result = new UserBLL().registerUser(user);
-                listenThread.response("response_register", result);
-
+                // version_1
 //                Users user = listenThread.getObjectUser();
 //                HandleResult result = new UserBLL().registerUser(user);
 //                listenThread.sendMessage("response_register");
@@ -95,24 +111,25 @@ public class Handler extends HandleBase {
 
             // CASE LOGIN
             case "AUTHENTICATE": {
-                System.out.println("Client[port " + listenThread.getSocket().getPort() + "] said: " + message);
+//                System.out.println("Client[port " + listenThread.getSocket().getPort() + "] said: " + message);
+//
+//                try {
+//                    Users user = (Users) request.getObject();
+//                    HandleResult result = new UserBLL().authenticate(user);
+//
+//                    listenThread.response("response_authenticate", result);
+//                    Thread.sleep(3000);
+//                    if (result.isSuccessed()) {
+//                        listenThread.responseHandleResult(new UserBLL()
+//                                .getAuthenData(result.getFolder().getFolderId(), result.getUser().getEmail()));
+//                        listenThread.registerMemberOnline(result.getUser());
+//                        System.out.println(listenThread.getMembersOnline().size());
+//                    }
+//                } catch (InterruptedException ex) {
+//                    Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
+//                }
 
-                try {
-                    Users user = (Users) request.getObject();
-                    HandleResult result = new UserBLL().authenticate(user);
-
-                    listenThread.response("response_authenticate", result);
-                    Thread.sleep(3000);
-                    if (result.isSuccessed()) {
-                        listenThread.responseHandleResult(new UserBLL()
-                                .getAuthenData(result.getFolder().getFolderId(), result.getUser().getEmail()));
-                        listenThread.registerMemberOnline(result.getUser());
-                        System.out.println(listenThread.getMembersOnline().size());
-                    }
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
+                // version_1
 //                try {
 //                    Users user = listenThread.getObjectUser();
 //                    HandleResult result = new UserBLL().authenticate(user);
@@ -131,31 +148,32 @@ public class Handler extends HandleBase {
             }
 
             case "AUTHENTICATE_ANONYMOUS_PERMISSION": {
-                System.out.println("Client[port " + listenThread.getSocket().getPort() + "] said: " + message);
-
-                try {
-                    String anonymousUser = (String) request.getObject();
-                    HandleResult result = new UserBLL()
-                            .authenticateWithAnonymousPermission(anonymousUser);
-
-                    listenThread.response("response_authenticate", result);
-                    Thread.sleep(3000);
-                    if (result.isSuccessed()) {
-                        listenThread.responseHandleResult(new UserBLL()
-                                .getAuthenDataWithAnonymousPermission());
-                    }
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
-                }
+//                System.out.println("Client[port " + listenThread.getSocket().getPort() + "] said: " + message);
+//
+//                try {
+//                    String anonymousUser = (String) request.getObject();
+//                    HandleResult result = new UserBLL()
+//                            .authenticateWithAnonymousPermission(anonymousUser);
+//
+//                    listenThread.response("response_authenticate", result);
+//                    Thread.sleep(3000);
+//                    if (result.isSuccessed()) {
+//                        listenThread.responseHandleResult(new UserBLL()
+//                                .getAuthenDataWithAnonymousPermission());
+//                    }
+//                } catch (InterruptedException ex) {
+//                    Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
+//                }
                 break;
             }
 
             // CASE TẠO FOLDER CON MỚI
             case "NEW_FOLDER": {
-                System.out.println("Client[port " + listenThread.getSocket().getPort() + "] said: " + message);
-                Folders folder = (Folders) request.getObject();
-                new FolderBLL().generateFolderChild(folder);
+//                System.out.println("Client[port " + listenThread.getSocket().getPort() + "] said: " + message);
+//                Folders folder = (Folders) request.getObject();
+//                new FolderBLL().generateFolderChild(folder);
 
+                // version_1
 //                Folders folder = listenThread.getObjectFolder();
 //                new FolderBLL().generateFolderChild(folder);
 //                System.out.println("folderParentId: " + folder.getFolderParentId());
@@ -167,6 +185,7 @@ public class Handler extends HandleBase {
 
             default:
                 System.out.println("Client[port " + listenThread.getSocket().getPort() + "] said default: " + message);
+                listenThread.response("notification;da nhan");
                 break;
         }
     }

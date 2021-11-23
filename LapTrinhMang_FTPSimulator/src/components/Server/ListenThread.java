@@ -1,10 +1,12 @@
 package components.Server;
 
-import handlers.HandleBase;
+import bll.FileBLL;
+import bll.FolderBLL;
+import bll.UserBLL;
+import handlers.Handler;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,14 +19,17 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import middlewares.HandleVerify;
 import models.FileDownloadInfo;
 import models.FileEvent;
+import models.Files;
+import models.Folders;
 import models.HandleResult;
 import models.MembersOnline;
 import models.ObjectRequest;
 import models.Users;
 
-public class ListenThread implements Runnable {
+public class ListenThread extends Thread {
 
     private Socket clientSocket;
     private String socketId;
@@ -32,25 +37,15 @@ public class ListenThread implements Runnable {
     private BufferedReader in;
     private boolean isDisconnect = false;
 
-    private static ObjectInputStream objInputStream;
-    private static ObjectOutputStream objOutputStream;
+    private ObjectInputStream objInputStream;
+    private ObjectOutputStream objOutputStream;
     private File dstFile;
     private FileOutputStream fileOutputStream;
-    private static HandleBase handlerBase;
     private static MembersOnline member;
+    private ObjectRequest request;
 
     public ListenThread(Socket clientSocket, String id) {
-        try {
-            this.clientSocket = clientSocket;
-            this.socketId = id;
-            out = new BufferedWriter(new OutputStreamWriter(this.clientSocket.getOutputStream()));
-            in = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
-
-            objOutputStream = new ObjectOutputStream(this.clientSocket.getOutputStream());
-            objInputStream = new ObjectInputStream(this.clientSocket.getInputStream());
-        } catch (IOException ex) {
-            Logger.getLogger(ListenThread.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        this.clientSocket = clientSocket;
     }
 
     public Socket getSocket() {
@@ -239,6 +234,7 @@ public class ListenThread implements Runnable {
         }
         try {
             objOutputStream.writeObject(new ObjectRequest(message, fileEvent));
+            objOutputStream.flush();
             objOutputStream.reset();
         } catch (IOException ex) {
             Logger.getLogger(ListenThread.class.getName()).log(Level.SEVERE, null, ex);
@@ -267,21 +263,18 @@ public class ListenThread implements Runnable {
         }
     }
 
-//    public String getMessage() {
-//        String message;
-//        try {
-//            message = in.readLine().replace("\n", "").replace("\r", "");
-//            if (String.valueOf(message.charAt(0)).equalsIgnoreCase("y")) {
-//                message = message.substring(1, message.length());
-//            }
-//        } catch (IOException ex) {
-//            message = "DISCONNECT";
-//        }
-//        return message;
-//    }
-    public void registerThread(HandleBase handler) {
-        handler.setListenThread(this);
-        ListenThread.handlerBase = handler;
+    public String getMessage() {
+        String message;
+        try {
+            message = in.readLine().replace("\n", "").replace("\r", "");
+            if (String.valueOf(message.charAt(0)).equalsIgnoreCase("y")) {
+                message = message.substring(1, message.length());
+            }
+        } catch (IOException ex) {
+            System.err.println("lỗi ở đây getMessage - " + ex);
+            message = "DISCONNECT";
+        }
+        return message;
     }
 
 //------------------------------------------------------------------------
@@ -324,11 +317,21 @@ public class ListenThread implements Runnable {
 //        Folders folder = (Folders) objInputStream.readObject();
 //        return folder;
 //    }
+    public void response(String data) {
+        try {
+            out.write(data);
+            out.newLine();
+            out.flush();
+        } catch (IOException ex) {
+            System.err.println("Server xảy ra lỗi function response IOException - " + ex);
+        }
+    }
+
     // bắn message + Object
     public void response(String message, Object object) {
         try {
             objOutputStream.writeObject(new ObjectRequest(message, object));
-            objOutputStream.reset();
+            objOutputStream.flush();
         } catch (IOException ex) {
             System.err.println("Server xảy ra lỗi function response IOException - " + ex);
         }
@@ -338,6 +341,7 @@ public class ListenThread implements Runnable {
     public void responseHandleResult(HandleResult result) {
         try {
             objOutputStream.writeObject(result);
+            objOutputStream.flush();
             objOutputStream.reset();
         } catch (IOException ex) {
             System.err.println("Server xảy ra lỗi function responseHandleResult IOException - " + ex);
@@ -348,40 +352,176 @@ public class ListenThread implements Runnable {
     public void run() {
         System.out.println("Một client id: " + getSocketId() + " vừa kết nối - [Thông tin] " + this.clientSocket);
         try {
+            out = new BufferedWriter(new OutputStreamWriter(this.clientSocket.getOutputStream()));
+            in = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
+
+            objOutputStream = new ObjectOutputStream(this.clientSocket.getOutputStream());
+            objInputStream = new ObjectInputStream(this.clientSocket.getInputStream());
+
             while (!isDisconnect) {
 
-//                String message = getMessage();
                 try {
-                    ObjectRequest request;
-                    synchronized (objInputStream) {
-                        request = (ObjectRequest) objInputStream.readObject();
-                    }
-                    if (request.getMessage().toUpperCase().equals("DISCONNECT")) {
-                        System.err.println("Client with port " + clientSocket.getPort() + " with disconnect");
-                        accept_disconnect();
-                        Thread.sleep(3000);
-                        removeMemberDisconnect(getMember());
+                    request = (ObjectRequest) objInputStream.readObject();
+                    String message = request.getMessage();
+                    switch (message.toUpperCase()) {
+                        case "DISCONNECT": {
+                            System.err.println("Client with port " + clientSocket.getPort() + " with disconnect");
+                            accept_disconnect();
+                            Thread.sleep(3000);
+                            removeMemberDisconnect(getMember());
 //                        Server.removeClientDisconnect(this);
+                            break;
+                        }
+
+                        case "DOWNLOAD_FILE": {
+                            System.out.println("Client đòi " + message);
+                            FileDownloadInfo fileDownloadInfo = (FileDownloadInfo) request.getObject();
+                            responseDownloadFile("accept_download_file", fileDownloadInfo);
+                            break;
+                        }
+
+                        case "UPLOAD_FILE": {
+                            System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
+                            Files filesInfo = (Files) request.getObject();
+                            FileEvent fileEvent = (FileEvent) request.getFileUpload();
+                            new FileBLL().insertNewFile(filesInfo);
+                            saveFile(fileEvent);
+
+//                try {
+//                    new FileBLL().insertNewFile(listenThread.FileSaver());
+//                new FileBLL().insertNewFile((Files) request.getObject());
+//                listenThread.saveFile();
+//                } catch (IOException ex) {
+//                    Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
+//                } catch (ClassNotFoundException ex) {
+//                    Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+                        }
+                        break;
+
+                        // bắn thông báo về cho client bằng id or email
+                        case "NOTIFICATION": {
+                            System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
+                            String email = (String) request.getObject();
+                            notification(email);
+                            break;
+                        }
+
+                        // CASE ĐĂNG KÝ
+                        case "VERIFY_REGISTER": {
+                            System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
+                            Users user = (Users) request.getObject();
+                            HandleResult result = HandleVerify.verifyRegisterUser(user);
+                            response("response_verify_register", result);
+
+                            // version_1
+//                Users user = listenThread.getObjectUser();
+//                HandleResult result = HandleVerify.verifyRegisterUser(user);
+//                listenThread.sendMessage("response_verify_register");
+//                listenThread.responseHandleResult(result);
+                            break;
+                        }
+                        case "REGISTER": {
+                            System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
+
+                            Users user = (Users) request.getObject();
+                            HandleResult result = new UserBLL().registerUser(user);
+                            response("response_register", result);
+
+                            // version_1
+//                Users user = listenThread.getObjectUser();
+//                HandleResult result = new UserBLL().registerUser(user);
+//                listenThread.sendMessage("response_register");
+//                listenThread.responseHandleResult(result);
+                            break;
+                        }
+
+                        // CASE LOGIN
+                        case "AUTHENTICATE": {
+                            System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
+
+                            try {
+                                Users user = (Users) request.getObject();
+                                HandleResult result = new UserBLL().authenticate(user);
+
+                                response("response_authenticate", result);
+                                Thread.sleep(3000);
+                                if (result.isSuccessed()) {
+                                    responseHandleResult(new UserBLL()
+                                            .getAuthenData(result.getFolder().getFolderId(), result.getUser().getEmail()));
+                                    registerMemberOnline(result.getUser());
+                                    System.out.println(getMembersOnline().size());
+                                }
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+
+                            // version_1
+//                try {
+//                    Users user = listenThread.getObjectUser();
+//                    HandleResult result = new UserBLL().authenticate(user);
+//                    listenThread.sendMessage("response_authenticate");
+//                    listenThread.responseHandleResult(result);
+//                    Thread.sleep(3000);
+//                    if (result.isSuccessed()) {
+//                        listenThread.responseHandleResult(new UserBLL().getAuthenData(result.getFolder().getFolderId()));
+//                    }
+//                } catch (IOException | ClassNotFoundException ex) {
+//                    Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
+//                } catch (InterruptedException ex) {
+//                    Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+                            break;
+                        }
+
+                        case "AUTHENTICATE_ANONYMOUS_PERMISSION": {
+                            System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
+
+                            try {
+                                String anonymousUser = (String) request.getObject();
+                                HandleResult result = new UserBLL()
+                                        .authenticateWithAnonymousPermission(anonymousUser);
+
+                                response("response_authenticate", result);
+                                Thread.sleep(3000);
+                                if (result.isSuccessed()) {
+                                    responseHandleResult(new UserBLL()
+                                            .getAuthenDataWithAnonymousPermission());
+                                }
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                            break;
+                        }
+
+                        // CASE TẠO FOLDER CON MỚI
+                        case "NEW_FOLDER": {
+                            System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
+                            Folders folder = (Folders) request.getObject();
+                            new FolderBLL().generateFolderChild(folder);
+
+                            // version_1
+//                Folders folder = listenThread.getObjectFolder();
+//                new FolderBLL().generateFolderChild(folder);
+//                System.out.println("folderParentId: " + folder.getFolderParentId());
+//                System.out.println("emailUser: " + folder.getEmail());
+//                System.out.println("rootPath: " + folder.getFolderPath());
+//                System.out.println("folderChildName: " + folder.getFolderName());
+                            break;
+                        }
+
+                        default: {
+                            System.out.println("Client[port " + getSocket().getPort() + "] said default: " + message);
+                            response("test", "test");
+                            break;
+                        }
                     }
-                    handlerBase.handleRequest(request);
                 } catch (ClassNotFoundException ex) {
                     Logger.getLogger(ListenThread.class.getName()).log(Level.SEVERE, null, ex);
                 }
-//                if (message.toUpperCase().equals("DISCONNECT")) {
-//                    System.err.println("Client with port " + clientSocket.getPort() + " with disconnect");
-//                    accept_disconnect();
-//                    Thread.sleep(3000);
-//                    Server.removeClientDisconnect(this);
-//                }
-//                handlerBase.handleRequest(message);
             }
-            in.close();
-            out.close();
-            clientSocket.close();
         } catch (InterruptedException ex) {
             System.err.println("Server error InterruptedException - " + ex);
-        } catch (EOFException ex) {
-            System.err.println("Server error EOFException - " + ex);
         } catch (IOException ex) {
             System.err.println("Server error IOException - " + ex);
         }

@@ -20,7 +20,8 @@ public abstract class HandleBase {
         this.listenThread = listenThread;
     }
 
-    public abstract void handleRequest(ObjectRequest message);
+//    public abstract void handleRequest(ObjectRequest message);
 //    public abstract void handleRequest(String message);
+    public abstract void handleRequest(String[] data);
 
 }
