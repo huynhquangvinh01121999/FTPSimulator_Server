@@ -21,9 +21,14 @@ public class HandleResult implements Serializable {
     private Users User;
     private Folders Folder;
     private List<Folders> ListFolderChild;
-    private List<Files> ListFile; 
+    private List<Files> ListFile;
+    private List<FileShares> ListFileShareses;
+    private List<FolderShares> ListFolderShareses;
+    private List<Permissions> ListPermissionses;
 
-    //#region dùng cho authenticate
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Dùng cho authenticate">
+    // 4 tham số: IsSuccessed - Message - User - Folder
     public HandleResult(boolean IsSuccessed, String Message, Users User,
             Folders Folder) {
         this.IsSuccessed = IsSuccessed;
@@ -31,34 +36,70 @@ public class HandleResult implements Serializable {
         this.User = User;
         this.Folder = Folder;
     }
-    
+
+    // 2 tham số: ListFolderChild - ListFile
     public HandleResult(List<Folders> ListFolderChild, List<Files> ListFile) {
         this.ListFolderChild = ListFolderChild;
         this.ListFile = ListFile;
     }
-    //#endregion
-    
 
+    // 3 tham số: ListFileShareses - ListFolderShareses - ListPermissionses
+    public HandleResult(List<FileShares> ListFileShareses, List<FolderShares> ListFolderShareses, List<Permissions> ListPermissionses) {
+        this.ListFileShareses = ListFileShareses;
+        this.ListFolderShareses = ListFolderShareses;
+        this.ListPermissionses = ListPermissionses;
+    }
+
+    // </editor-fold>
+    
+    // successed: IsSuccessed - Message - Value
     public HandleResult(boolean IsSuccessed, String Message, int Value) {
         this.IsSuccessed = IsSuccessed;
         this.Message = Message;
         this.Value = Value;
     }
 
-    // successed
+    // successed: IsSuccessed - Value
     public HandleResult(boolean IsSuccessed, int Value) {
         this.IsSuccessed = IsSuccessed;
         this.Value = Value;
     }
 
-    // error
+    // error: IsSuccessed - Message
     public HandleResult(boolean IsSuccessed, String Message) {
         this.IsSuccessed = IsSuccessed;
         this.Message = Message;
     }
 
+    // success or error: IsSuccessed
     public HandleResult(boolean IsSuccessed) {
         this.IsSuccessed = IsSuccessed;
+    }
+
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Set - Get methods">
+    public List<FileShares> getListFileShareses() {
+        return ListFileShareses;
+    }
+
+    public void setListFileShareses(List<FileShares> ListFileShareses) {
+        this.ListFileShareses = ListFileShareses;
+    }
+
+    public List<FolderShares> getListFolderShareses() {
+        return ListFolderShareses;
+    }
+
+    public void setListFolderShareses(List<FolderShares> ListFolderShareses) {
+        this.ListFolderShareses = ListFolderShareses;
+    }
+
+    public List<Permissions> getListPermissionses() {
+        return ListPermissionses;
+    }
+
+    public void setListPermissionses(List<Permissions> ListPermissionses) {
+        this.ListPermissionses = ListPermissionses;
     }
 
     public List<Folders> getListFolderChild() {
@@ -116,5 +157,6 @@ public class HandleResult implements Serializable {
     public void setMessage(String Message) {
         this.Message = Message;
     }
-
+    // </editor-fold>
+    
 }

@@ -4,14 +4,10 @@ import bll.helpers.DateHelper;
 import bll.helpers.Encryptions;
 import bll.helpers.FileExtensions;
 import bll.helpers.ThreadRandoms;
-import dal.Services.FolderServices;
-import dal.Services.UserServices;
+import dal.Services.*;
 import java.util.List;
 import middlewares.HandleVerify;
-import models.Files;
-import models.Folders;
-import models.HandleResult;
-import models.Users;
+import models.*;
 
 /**
  *
@@ -21,10 +17,15 @@ public class UserBLL {
 
     private final UserServices userServices = new UserServices();
     private final FolderServices folderServices = new FolderServices();
+    private final FolderShareServices folderShareServices = new FolderShareServices();
+    private final FileShareServices fileShareServices = new FileShareServices();
+    private final PermissionServices permissionServices = new PermissionServices();
 
     public UserBLL() {
     }
-
+    
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Register">
     public HandleResult registerUser(Users user) {
         user.setPassword(Encryptions.md5(user.getPassword()));
         String prefixEmail = user.getEmail().split("@")[0].toString();
@@ -47,7 +48,10 @@ public class UserBLL {
         }
         return new HandleResult(false, "Đã xảy ra lỗi khi đăng ký.\nVui lòng kiểm tra lại thông tin.!!!");
     }
-
+    // </editor-fold>
+    
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Authenticate with user">
     public HandleResult authenticate(Users user) {
         HandleResult verifyResult = HandleVerify.verifyAuthor(user);
         if (verifyResult.isSuccessed()) {
@@ -91,7 +95,18 @@ public class UserBLL {
         return new HandleResult(listFolderChildInfo, listFileInfo);
     }
 
-    // authenticate with anonymous permission
+    public HandleResult getAuthenDataShare(String email) {
+
+        List<FileShares> listFileShare = fileShareServices.GetFileShareToMe(email);
+        List<FolderShares> listFolderShare = folderShareServices.getFolderShareToMe(email);
+        List<Permissions> listPermission = permissionServices.GetAll();
+
+        return new HandleResult(listFileShare, listFolderShare, listPermission);
+    }
+    // </editor-fold>
+    
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Authenticate with anonymous permission">
     public HandleResult authenticateWithAnonymousPermission(String anonymous) {
         Users userInfo = new Users();
         userInfo.setFullName(anonymous);
@@ -113,4 +128,5 @@ public class UserBLL {
 
         return new HandleResult(null, listFileAnonymous);
     }
+     // </editor-fold>
 }

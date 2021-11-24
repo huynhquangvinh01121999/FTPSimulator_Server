@@ -1,5 +1,7 @@
 package dal.Services;
 
+import dal.Base.IServices;
+import dal.Base.BaseServices;
 import dal.Commons.GetConnection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

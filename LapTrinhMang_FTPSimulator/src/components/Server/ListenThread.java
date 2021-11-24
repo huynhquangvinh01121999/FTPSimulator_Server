@@ -440,20 +440,16 @@ public class ListenThread extends Thread {
                         case "AUTHENTICATE": {
                             System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
 
-                            try {
-                                Users user = (Users) request.getObject();
-                                HandleResult result = new UserBLL().authenticate(user);
-
-                                response("response_authenticate", result);
-                                Thread.sleep(3000);
-                                if (result.isSuccessed()) {
-                                    responseHandleResult(new UserBLL()
-                                            .getAuthenData(result.getFolder().getFolderId(), result.getUser().getEmail()));
-                                    registerMemberOnline(result.getUser());
-                                    System.out.println(getMembersOnline().size());
-                                }
-                            } catch (InterruptedException ex) {
-                                Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
+                            Users user = (Users) request.getObject();
+                            UserBLL userBLL = new UserBLL();
+                            HandleResult result = userBLL.authenticate(user);
+                            response("response_authenticate", result);
+                            if (result.isSuccessed()) {
+                                responseHandleResult(userBLL
+                                        .getAuthenData(result.getFolder().getFolderId(), result.getUser().getEmail()));
+                                System.out.println("ok1");
+                                responseHandleResult(userBLL.getAuthenDataShare(result.getUser().getEmail()));
+                                System.out.println("ok2");
                             }
 
                             // version_1
