@@ -2,6 +2,7 @@ package components.Server;
 
 import bll.FileBLL;
 import bll.FolderBLL;
+import bll.SharesBLL;
 import bll.UserBLL;
 import handlers.Handler;
 import java.io.BufferedReader;
@@ -17,9 +18,11 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import middlewares.HandleVerify;
+import models.DataShare;
 import models.FileDownloadInfo;
 import models.FileEvent;
 import models.Files;
@@ -309,6 +312,17 @@ public class ListenThread extends Thread {
         }
     }
 
+    public void notificationShared(List<String> listEmailShared, String message) {
+        for (String emailShared : listEmailShared) {
+            for (MembersOnline member : getMembersOnline()) {
+                if (member.getUsers().getEmail().trim().equals(emailShared.trim())) {
+                    member.getListenThread().response("notifi_shareddata", message);
+                }
+            }
+        }
+
+    }
+
 //    public Users getObjectUser() throws IOException, ClassNotFoundException {
 //        Users user = (Users) objInputStream.readObject();
 //        return user;
@@ -369,7 +383,6 @@ public class ListenThread extends Thread {
                             accept_disconnect();
                             Thread.sleep(3000);
                             removeMemberDisconnect(getMember());
-//                        Server.removeClientDisconnect(this);
                             break;
                         }
 
@@ -447,9 +460,8 @@ public class ListenThread extends Thread {
                             if (result.isSuccessed()) {
                                 responseHandleResult(userBLL
                                         .getAuthenData(result.getFolder().getFolderId(), result.getUser().getEmail()));
-                                System.out.println("ok1");
                                 responseHandleResult(userBLL.getAuthenDataShare(result.getUser().getEmail()));
-                                System.out.println("ok2");
+                                registerMemberOnline(result.getUser());
                             }
 
                             // version_1
@@ -503,6 +515,24 @@ public class ListenThread extends Thread {
 //                System.out.println("emailUser: " + folder.getEmail());
 //                System.out.println("rootPath: " + folder.getFolderPath());
 //                System.out.println("folderChildName: " + folder.getFolderName());
+                            break;
+                        }
+
+                        case "SHARE_FILES": {
+                            System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
+                            DataShare dataShare = (DataShare) request.getObject();
+                            new SharesBLL().shareFiles(dataShare);
+                            String notifiShareFile = "Bạn vừa được chia sẻ tệp tin từ email " + dataShare.getFromEmail();
+                            notificationShared(dataShare.getListUserShare(), notifiShareFile);
+                            break;
+                        }
+
+                        case "SHARE_FOLDER": {
+                            System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
+                            DataShare dataShare = (DataShare) request.getObject();
+                            new SharesBLL().shareFolder(dataShare);
+                            String notifiShareFolder = "Bạn vừa được chia sẻ một thư mục từ email " + dataShare.getFromEmail();
+                            notificationShared(dataShare.getListUserShare(), notifiShareFolder);
                             break;
                         }
 

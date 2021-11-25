@@ -5,6 +5,7 @@ import bll.helpers.Encryptions;
 import bll.helpers.FileExtensions;
 import bll.helpers.ThreadRandoms;
 import dal.Services.*;
+import java.util.ArrayList;
 import java.util.List;
 import middlewares.HandleVerify;
 import models.*;
@@ -16,6 +17,7 @@ import models.*;
 public class UserBLL {
 
     private final UserServices userServices = new UserServices();
+    private final FileServices fileServices = new FileServices();
     private final FolderServices folderServices = new FolderServices();
     private final FolderShareServices folderShareServices = new FolderShareServices();
     private final FileShareServices fileShareServices = new FileShareServices();
@@ -23,7 +25,7 @@ public class UserBLL {
 
     public UserBLL() {
     }
-    
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Register">
     public HandleResult registerUser(Users user) {
@@ -49,7 +51,7 @@ public class UserBLL {
         return new HandleResult(false, "Đã xảy ra lỗi khi đăng ký.\nVui lòng kiểm tra lại thông tin.!!!");
     }
     // </editor-fold>
-    
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Authenticate with user">
     public HandleResult authenticate(Users user) {
@@ -97,14 +99,24 @@ public class UserBLL {
 
     public HandleResult getAuthenDataShare(String email) {
 
-        List<FileShares> listFileShare = fileShareServices.GetFileShareToMe(email);
+        List<FileShares> listFileShares = fileShareServices.GetFileShareToMe(email);
+        List<Files> listFiles = new ArrayList<>();
+        for (FileShares item : listFileShares) {
+            listFiles.add(fileServices.Find(item.getFileId()));
+        }
+
         List<FolderShares> listFolderShare = folderShareServices.getFolderShareToMe(email);
+        List<Folders> listFolders = new ArrayList<>();
+        for (FolderShares item : listFolderShare) {
+            listFolders.add(folderServices.Find(item.getFolderId()));
+        }
+
         List<Permissions> listPermission = permissionServices.GetAll();
 
-        return new HandleResult(listFileShare, listFolderShare, listPermission);
+        return new HandleResult(listFiles, listFolders, listPermission);
     }
+
     // </editor-fold>
-    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Authenticate with anonymous permission">
     public HandleResult authenticateWithAnonymousPermission(String anonymous) {
@@ -128,5 +140,5 @@ public class UserBLL {
 
         return new HandleResult(null, listFileAnonymous);
     }
-     // </editor-fold>
+    // </editor-fold>
 }

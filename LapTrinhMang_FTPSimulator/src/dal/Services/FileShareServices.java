@@ -34,12 +34,39 @@ public class FileShareServices extends BaseServices implements IServices<FileSha
 
     @Override
     public boolean Create(FileShares entity) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            String sql = "insert into fileshares(FileId,FromEmail,ToEmail,PermissionId,ShareAt) values (?,?,?,?,?)";
+            dbContext = GetConnection.getInstance().getConn();
+            ps = dbContext.prepareStatement(sql);
+            ps.setString(1, entity.getFileId());
+            ps.setString(2, entity.getFromEmail());
+            ps.setString(3, entity.getToEmail());
+            ps.setString(4, entity.getPermissionId());
+            ps.setString(5, entity.getShareAt());
+            ps.execute();
+            return true;
+        } catch (SQLException ex) {
+            System.out.println("Xảy ra lỗi khi lưu mới thông tin fileshares - " + ex);
+            return false;
+        }
     }
 
     @Override
     public boolean Update(FileShares entity) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            String sql = "update fileshares set PermissionId = ? where FileId = ? and FromEmail = ? and ToEmail = ?";
+            dbContext = GetConnection.getInstance().getConn();
+            ps = dbContext.prepareStatement(sql);
+            ps.setString(1, entity.getPermissionId());
+            ps.setString(2, entity.getFileId());
+            ps.setString(3, entity.getFromEmail());
+            ps.setString(4, entity.getToEmail());
+            ps.execute();
+            return true;
+        } catch (SQLException ex) {
+            System.out.println("Xảy ra lỗi khi cập nhật thông tin fileshares - " + ex);
+            return false;
+        }
     }
 
     @Override
@@ -76,5 +103,31 @@ public class FileShareServices extends BaseServices implements IServices<FileSha
             }
         }
         return list;
+    }
+
+    public boolean checkFileShare(String fileId, String fromEmail, String toEmail) {
+        try {
+            String sql = "select * from fileshares where FileId = ? and FromEmail = ? and ToEmail = ? ";
+            dbContext = GetConnection.getInstance().getConn();
+            ps = dbContext.prepareStatement(sql);
+            ps.setString(1, fileId);
+            ps.setString(2, fromEmail);
+            ps.setString(3, toEmail);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+
+        } catch (SQLException ex) {
+            System.err.println("Lỗi khi đọc dữ liệu - " + ex);
+        } finally {
+            try {
+                rs.close();
+                ps.close();
+            } catch (SQLException ex) {
+                System.err.println("đóng connect ko thành công - " + ex);
+            }
+        }
+        return false;
     }
 }

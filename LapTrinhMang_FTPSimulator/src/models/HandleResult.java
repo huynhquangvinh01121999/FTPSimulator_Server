@@ -22,8 +22,8 @@ public class HandleResult implements Serializable {
     private Folders Folder;
     private List<Folders> ListFolderChild;
     private List<Files> ListFile;
-    private List<FileShares> ListFileShareses;
-    private List<FolderShares> ListFolderShareses;
+    private List<Files> ListFileShareses;
+    private List<Folders> ListFolderShareses;
     private List<Permissions> ListPermissionses;
 
     @SuppressWarnings("unchecked")
@@ -44,14 +44,13 @@ public class HandleResult implements Serializable {
     }
 
     // 3 tham số: ListFileShareses - ListFolderShareses - ListPermissionses
-    public HandleResult(List<FileShares> ListFileShareses, List<FolderShares> ListFolderShareses, List<Permissions> ListPermissionses) {
+    public HandleResult(List<Files> ListFileShareses, List<Folders> ListFolderShareses, List<Permissions> ListPermissionses) {
         this.ListFileShareses = ListFileShareses;
         this.ListFolderShareses = ListFolderShareses;
         this.ListPermissionses = ListPermissionses;
     }
 
     // </editor-fold>
-    
     // successed: IsSuccessed - Message - Value
     public HandleResult(boolean IsSuccessed, String Message, int Value) {
         this.IsSuccessed = IsSuccessed;
@@ -78,24 +77,25 @@ public class HandleResult implements Serializable {
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Set - Get methods">
-    public List<FileShares> getListFileShareses() {
-        return ListFileShareses;
-    }
-
-    public void setListFileShareses(List<FileShares> ListFileShareses) {
-        this.ListFileShareses = ListFileShareses;
-    }
-
-    public List<FolderShares> getListFolderShareses() {
-        return ListFolderShareses;
-    }
-
-    public void setListFolderShareses(List<FolderShares> ListFolderShareses) {
-        this.ListFolderShareses = ListFolderShareses;
-    }
 
     public List<Permissions> getListPermissionses() {
         return ListPermissionses;
+    }
+
+    public List<Files> getListFileShareses() {
+        return ListFileShareses;
+    }
+
+    public void setListFileShareses(List<Files> ListFileShareses) {
+        this.ListFileShareses = ListFileShareses;
+    }
+
+    public List<Folders> getListFolderShareses() {
+        return ListFolderShareses;
+    }
+
+    public void setListFolderShareses(List<Folders> ListFolderShareses) {
+        this.ListFolderShareses = ListFolderShareses;
     }
 
     public void setListPermissionses(List<Permissions> ListPermissionses) {
@@ -158,5 +158,5 @@ public class HandleResult implements Serializable {
         this.Message = Message;
     }
     // </editor-fold>
-    
+
 }
