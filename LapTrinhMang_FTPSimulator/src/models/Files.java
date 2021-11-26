@@ -15,6 +15,7 @@ public class Files implements Serializable {
 
     private String FileId, FileName, SourcePath, FileSize,
             FileExtension, Status, FolderId, UploadAt, PrexEmail;
+    private String EmailShare;
 
     public Files(String FileId, String FileName, String SourcePath, String FileSize, String FileExtension, String Status, String FolderId, String UploadAt) {
         this.FileId = FileId;
@@ -28,6 +29,14 @@ public class Files implements Serializable {
     }
 
     public Files() {
+    }
+
+    public String getEmailShare() {
+        return EmailShare;
+    }
+
+    public void setEmailShare(String EmailShare) {
+        this.EmailShare = EmailShare;
     }
 
     public String getFileId() {

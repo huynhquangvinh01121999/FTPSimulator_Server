@@ -6,8 +6,8 @@ package models;
  */
 public class MailSender {
 
-    private final String FromEmail = "vatvashop20@gmail.com";
-    private final String Password = "3117410300";
+    private final String FromEmail = "hotrohoctap99@gmail.com";
+    private final String Password = "vinh01121999";
     private final String Subject = "Verify Code";
     private final String AliasAddress = "FCloud";
     private final String Body = "Mã xác thực của bạn là: ";

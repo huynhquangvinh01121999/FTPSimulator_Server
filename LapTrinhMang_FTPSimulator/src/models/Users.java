@@ -13,9 +13,10 @@ import java.io.Serializable;
  */
 public class Users implements Serializable {
 
-    private String Email, Password, FullName, Sex, Dob, Status, CreateAt, FileSizeUpload, FileSizeDownload;
+    private String Email, Password, FullName, Sex, Dob, Status,
+            CreateAt, FileSizeUpload, FileSizeDownload, PermissionId;
 
-    public Users(String Email, String Password, String FullName, String Sex, String Dob, String Status, String CreateAt) {
+    public Users(String Email, String Password, String FullName, String Sex, String Dob, String Status, String CreateAt, String FileSizeUpload, String FileSizeDownload, String PermissionId) {
         this.Email = Email;
         this.Password = Password;
         this.FullName = FullName;
@@ -23,9 +24,20 @@ public class Users implements Serializable {
         this.Dob = Dob;
         this.Status = Status;
         this.CreateAt = CreateAt;
+        this.FileSizeUpload = FileSizeUpload;
+        this.FileSizeDownload = FileSizeDownload;
+        this.PermissionId = PermissionId;
     }
 
     public Users() {
+    }
+
+    public String getPermissionId() {
+        return PermissionId;
+    }
+
+    public void setPermissionId(String PermissionId) {
+        this.PermissionId = PermissionId;
     }
 
     public String getFileSizeUpload() {

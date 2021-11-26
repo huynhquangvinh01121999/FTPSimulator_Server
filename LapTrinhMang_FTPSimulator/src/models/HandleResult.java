@@ -25,6 +25,8 @@ public class HandleResult implements Serializable {
     private List<Files> ListFileShareses;
     private List<Folders> ListFolderShareses;
     private List<Permissions> ListPermissionses;
+    private List<FileShares> ListFileShared;
+    private List<FolderShares> ListFolderShared;
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Dùng cho authenticate">
@@ -44,7 +46,11 @@ public class HandleResult implements Serializable {
     }
 
     // 3 tham số: ListFileShareses - ListFolderShareses - ListPermissionses
-    public HandleResult(List<Files> ListFileShareses, List<Folders> ListFolderShareses, List<Permissions> ListPermissionses) {
+    public HandleResult(List<FileShares> ListFileShared, List<FolderShares> ListFolderShared,
+            List<Files> ListFileShareses, List<Folders> ListFolderShareses,
+            List<Permissions> ListPermissionses) {
+        this.ListFileShared = ListFileShared;
+        this.ListFolderShared = ListFolderShared;
         this.ListFileShareses = ListFileShareses;
         this.ListFolderShareses = ListFolderShareses;
         this.ListPermissionses = ListPermissionses;
@@ -80,6 +86,22 @@ public class HandleResult implements Serializable {
 
     public List<Permissions> getListPermissionses() {
         return ListPermissionses;
+    }
+
+    public List<FileShares> getListFileShared() {
+        return ListFileShared;
+    }
+
+    public void setListFileShared(List<FileShares> ListFileShared) {
+        this.ListFileShared = ListFileShared;
+    }
+
+    public List<FolderShares> getListFolderShared() {
+        return ListFolderShared;
+    }
+
+    public void setListFolderShared(List<FolderShares> ListFolderShared) {
+        this.ListFolderShared = ListFolderShared;
     }
 
     public List<Files> getListFileShareses() {

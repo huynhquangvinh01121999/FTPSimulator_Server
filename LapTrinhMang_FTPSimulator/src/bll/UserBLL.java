@@ -84,12 +84,16 @@ public class UserBLL {
 
     public HandleResult getAuthenData(String folderParentId, String email) {
         // lấy ra danh sách các folder con
-        List<Folders> listFolderChildInfo = folderServices.FindListChildFolder(folderParentId);
+        List<Folders> listFolderChildInfo = new ArrayList<>();
+        listFolderChildInfo = folderServices.FindListChildFolder(folderParentId);
 
         // lấy ra toàn bộ tất cả các file của user + anonymous
         String prexEmail = email.split("@")[0];
-        List<Files> listFileInfo = new FileBLL().GetFilesByPrexEmail(prexEmail);
-        List<Files> listFileAnonymous = new FileBLL().GetFilesByPrexEmail("anonymous");
+        List<Files> listFileInfo = new ArrayList<>();
+        listFileInfo = new FileBLL().GetFilesByPrexEmail(prexEmail);
+
+        List<Files> listFileAnonymous = new ArrayList<>();
+        listFileAnonymous = new FileBLL().GetFilesByPrexEmail("anonymous");
 
         // thêm toàn bộ file anonymous vào trong list file info
         listFileInfo.addAll(listFileAnonymous);
@@ -113,7 +117,7 @@ public class UserBLL {
 
         List<Permissions> listPermission = permissionServices.GetAll();
 
-        return new HandleResult(listFiles, listFolders, listPermission);
+        return new HandleResult(listFileShares, listFolderShare, listFiles, listFolders, listPermission);
     }
 
     // </editor-fold>

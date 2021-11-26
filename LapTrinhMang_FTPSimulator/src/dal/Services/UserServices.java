@@ -39,6 +39,7 @@ public class UserServices extends BaseServices implements IServices<Users> {
                 user.setCreateAt(rs.getString(7));
                 user.setFileSizeUpload(rs.getString(8));
                 user.setFileSizeDownload(rs.getString(9));
+                user.setPermissionId(rs.getString(10));
 
                 list.add(user);
             }
@@ -76,6 +77,7 @@ public class UserServices extends BaseServices implements IServices<Users> {
                 user.setCreateAt(rs.getString(7));
                 user.setFileSizeUpload(rs.getString(8));
                 user.setFileSizeDownload(rs.getString(9));
+                user.setPermissionId(rs.getString(10));
 
                 return user;
             }
@@ -202,10 +204,6 @@ public class UserServices extends BaseServices implements IServices<Users> {
             }
         }
         return null;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(new UserServices().Create(new Users("test@gmail.com", "test", "test", "test", "test", "test", "test")));
     }
 
 }

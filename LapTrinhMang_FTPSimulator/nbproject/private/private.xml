@@ -5,7 +5,9 @@
         <group>
             <file>file:/C:/Users/HP/Documents/NetBeansProjects/LapTrinhMang_FTPSimulator/src/bll/UserBLL.java</file>
             <file>file:/C:/Users/HP/Documents/NetBeansProjects/LapTrinhMang_FTPSimulator/src/components/Server/ListenThread.java</file>
+            <file>file:/C:/Users/HP/Documents/NetBeansProjects/LapTrinhMang_FTPSimulator/src/bll/SharesBLL.java</file>
             <file>file:/C:/Users/HP/Documents/NetBeansProjects/LapTrinhMang_FTPSimulator/src/components/Server/Server.java</file>
+            <file>file:/C:/Users/HP/Documents/NetBeansProjects/LapTrinhMang_FTPSimulator/src/dal/Services/FileShareServices.java</file>
         </group>
     </open-files>
 </project-private>

@@ -411,6 +411,15 @@ public class ListenThread extends Thread {
 //                }
                         }
                         break;
+                        
+                        case "UPLOAD_FILE_SHARE": {
+                            System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
+                            Files filesInfo = (Files) request.getObject();
+                            FileEvent fileEvent = (FileEvent) request.getFileUpload();
+                            new FileBLL().insertNewFileShare(filesInfo);
+                            saveFile(fileEvent);
+                        }
+                        break;
 
                         // bắn thông báo về cho client bằng id or email
                         case "NOTIFICATION": {
@@ -485,19 +494,13 @@ public class ListenThread extends Thread {
                         case "AUTHENTICATE_ANONYMOUS_PERMISSION": {
                             System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
 
-                            try {
-                                String anonymousUser = (String) request.getObject();
-                                HandleResult result = new UserBLL()
-                                        .authenticateWithAnonymousPermission(anonymousUser);
-
-                                response("response_authenticate", result);
-                                Thread.sleep(3000);
-                                if (result.isSuccessed()) {
-                                    responseHandleResult(new UserBLL()
-                                            .getAuthenDataWithAnonymousPermission());
-                                }
-                            } catch (InterruptedException ex) {
-                                Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
+                            String anonymousUser = (String) request.getObject();
+                            HandleResult result = new UserBLL()
+                                    .authenticateWithAnonymousPermission(anonymousUser);
+                            response("response_authenticate_anonymous", result);
+                            if (result.isSuccessed()) {
+                                responseHandleResult(new UserBLL()
+                                        .getAuthenDataWithAnonymousPermission());
                             }
                             break;
                         }

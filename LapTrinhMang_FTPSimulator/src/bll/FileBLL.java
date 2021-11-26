@@ -1,12 +1,16 @@
 package bll;
 
+import bll.helpers.DateHelper;
 import dal.Services.FileServices;
+import dal.Services.FileShareServices;
 import dal.Services.FolderServices;
 import java.util.List;
+import models.FileShares;
 import models.Files;
 
 public class FileBLL {
 
+    private final FileShareServices fileShareServices = new FileShareServices();
     private final FileServices fileService = new FileServices();
 
     public FileBLL() {
@@ -51,10 +55,25 @@ public class FileBLL {
         return fileService.Create(file);
     }
 
+    public boolean insertNewFileShare(Files file) {
+        String remainingSizeFolder = new FolderServices().GetRemainingSizeFolder(file.getFolderId());
+        int remainingSizeFolderConvert
+                = Integer.parseInt(remainingSizeFolder.replaceAll(",", ""))
+                - Integer.parseInt(file.getFileSize().replaceAll(",", ""));
+        try {
+            new FolderServices().
+                    UpdateRemainingSize(String.valueOf(remainingSizeFolderConvert), file.getFolderId());
+        } catch (Exception e) {
+            System.err.println("Xảy ra lỗi khi update dung lượng còn lại của folder" + e);
+        }
+        fileShareServices.Create(new FileShares(file.getFileId(), file.getEmailShare(), file.getEmailShare(), "a", DateHelper.Now()));
+        return fileService.Create(file);
+    }
+
     public List<Files> GetFilesByFolderId(String folderId) {
         return fileService.GetListFileByFolderId(folderId.trim());
     }
-    
+
     public List<Files> GetFilesByPrexEmail(String prexEmail) {
         return fileService.GetListFileByPrexEmail(prexEmail.trim());
     }
