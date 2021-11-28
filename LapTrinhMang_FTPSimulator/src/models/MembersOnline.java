@@ -5,7 +5,7 @@
  */
 package models;
 
-import components.Server.ListenThread;
+import components.ListenThread;
 
 /**
  *
