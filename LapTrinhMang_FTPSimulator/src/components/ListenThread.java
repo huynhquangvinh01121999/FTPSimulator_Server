@@ -43,7 +43,7 @@ public class ListenThread extends Thread {
     private ObjectOutputStream objOutputStream;
     private File dstFile;
     private FileOutputStream fileOutputStream;
-    private static MembersOnline member;
+    private MembersOnline member;
     private ObjectRequest request;
 
     public ListenThread(Socket clientSocket, String id) {
@@ -58,12 +58,12 @@ public class ListenThread extends Thread {
         return socketId;
     }
 
-    public static MembersOnline getMember() {
+    public MembersOnline getMember() {
         return member;
     }
 
-    public static void setMember(MembersOnline member) {
-        ListenThread.member = member;
+    public void setMember(MembersOnline memberInfo) {
+        member = memberInfo;
     }
 
     public static ArrayList<ListenThread> getListClient() {
@@ -281,9 +281,9 @@ public class ListenThread extends Thread {
 
 //------------------------------------------------------------------------
     public void registerMemberOnline(Users user) {
-        MembersOnline member = new MembersOnline(this, user);
-        setMember(member);
-        Server.registerMemberOnline(member);
+        MembersOnline memberInfo = new MembersOnline(this, user);
+        setMember(memberInfo);
+        Server.registerMemberOnline(memberInfo);
     }
 
     public void removeMemberDisconnect(MembersOnline member) {

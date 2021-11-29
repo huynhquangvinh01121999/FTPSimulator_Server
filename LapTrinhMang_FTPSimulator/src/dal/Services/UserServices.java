@@ -205,5 +205,20 @@ public class UserServices extends BaseServices implements IServices<Users> {
         }
         return null;
     }
+    
+    public boolean UpdatePerId(String email, String perId) {
+        try {
+            String sql = "update users set PermissionId = ? where Email = ?";
+            dbContext = GetConnection.getInstance().getConn();
+            ps = dbContext.prepareStatement(sql);
+            ps.setString(1, perId);
+            ps.setString(2, email);
+            ps.execute();
+            return true;
+        } catch (SQLException ex) {
+            System.out.println("Xảy ra lỗi khi update quyền cho user - " + ex);
+            return false;
+        }
+    }
 
 }

@@ -43,7 +43,6 @@ public class Server {
 //        }
 //    }
     // </editor-fold>
-    
     private static ExecutorService executor;
     private static ServerSocket serverSocket;
     private static int port;
@@ -106,7 +105,7 @@ public class Server {
 
     public static void removeMemberDisconnect(MembersOnline member) {
         list_members.remove(member);
-        System.out.println(list_members.size());
+        System.out.println("Total user online: " + list_members.size());
     }
 
     public static ArrayList<MembersOnline> getMembersOnline() {

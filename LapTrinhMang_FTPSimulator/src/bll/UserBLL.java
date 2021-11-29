@@ -25,6 +25,14 @@ public class UserBLL {
 
     public UserBLL() {
     }
+    
+    public List<Users> getAllUser(){
+        return userServices.GetAll();
+    }
+    
+    public boolean UpdatePermissionForUser(String email, String perId){
+        return userServices.UpdatePerId(email, perId);
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Register">
