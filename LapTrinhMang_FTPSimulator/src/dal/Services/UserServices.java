@@ -40,6 +40,7 @@ public class UserServices extends BaseServices implements IServices<Users> {
                 user.setFileSizeUpload(rs.getString(8));
                 user.setFileSizeDownload(rs.getString(9));
                 user.setPermissionId(rs.getString(10));
+                user.setAnonymousPermission(rs.getString(11));
 
                 list.add(user);
             }
@@ -78,6 +79,7 @@ public class UserServices extends BaseServices implements IServices<Users> {
                 user.setFileSizeUpload(rs.getString(8));
                 user.setFileSizeDownload(rs.getString(9));
                 user.setPermissionId(rs.getString(10));
+                user.setAnonymousPermission(rs.getString(11));
 
                 return user;
             }
@@ -205,7 +207,7 @@ public class UserServices extends BaseServices implements IServices<Users> {
         }
         return null;
     }
-    
+
     public boolean UpdatePerId(String email, String perId) {
         try {
             String sql = "update users set PermissionId = ? where Email = ?";
@@ -221,4 +223,33 @@ public class UserServices extends BaseServices implements IServices<Users> {
         }
     }
 
+    public boolean UpdateCapacity(String type, String email, String size) {
+        try {
+            String sql = "update users set " + type + " = ? where Email = ?";
+            dbContext = GetConnection.getInstance().getConn();
+            ps = dbContext.prepareStatement(sql);
+            ps.setString(1, size);
+            ps.setString(2, email);
+            ps.execute();
+            return true;
+        } catch (SQLException ex) {
+            System.out.println("Xảy ra lỗi khi update dung lượng upload/download cho user - " + ex);
+            return false;
+        }
+    }
+    
+    public boolean UpdateAnonymousPermission(String email, String permission) {
+        try {
+            String sql = "update users set AnonymousPermission = ? where Email = ?";
+            dbContext = GetConnection.getInstance().getConn();
+            ps = dbContext.prepareStatement(sql);
+            ps.setString(1, permission);
+            ps.setString(2, email);
+            ps.execute();
+            return true;
+        } catch (SQLException ex) {
+            System.out.println("Xảy ra lỗi khi update quyền ẩn danh cho user - " + ex);
+            return false;
+        }
+    }
 }

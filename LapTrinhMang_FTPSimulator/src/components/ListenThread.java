@@ -35,6 +35,7 @@ public class ListenThread extends Thread {
 
     private Socket clientSocket;
     private String socketId;
+    private boolean ANONYMOUS_PERMISSION = true;
     private BufferedWriter out;
     private BufferedReader in;
     private boolean isDisconnect = false;
@@ -48,6 +49,7 @@ public class ListenThread extends Thread {
 
     public ListenThread(Socket clientSocket, String id) {
         this.clientSocket = clientSocket;
+        this.socketId = id;
     }
 
     public Socket getSocket() {
@@ -56,6 +58,14 @@ public class ListenThread extends Thread {
 
     public String getSocketId() {
         return socketId;
+    }
+
+    public boolean isANONYMOUS_PERMISSION() {
+        return ANONYMOUS_PERMISSION;
+    }
+
+    public void setANONYMOUS_PERMISSION(boolean ANONYMOUS_PERMISSION) {
+        this.ANONYMOUS_PERMISSION = ANONYMOUS_PERMISSION;
     }
 
     public MembersOnline getMember() {
@@ -371,6 +381,12 @@ public class ListenThread extends Thread {
             objOutputStream = new ObjectOutputStream(this.clientSocket.getOutputStream());
             objInputStream = new ObjectInputStream(this.clientSocket.getInputStream());
 
+            // add client connect vô danh sách
+            Server.registerClient(this);
+
+            // reload lại Server UI khi client connect
+            ServerUI.reloadClientConnect(this);
+
             while (!isDisconnect) {
 
                 try {
@@ -381,7 +397,15 @@ public class ListenThread extends Thread {
                             System.err.println("Client with port " + clientSocket.getPort() + " with disconnect");
                             accept_disconnect();
                             Thread.sleep(3000);
+
+                            // Xóa user đã offline khỏi ds user đang online
                             removeMemberDisconnect(getMember());
+
+                            // Xóa client bị đóng kết nối khỏi ds client đang connect
+                            Server.removeClientDisconnect(this);
+
+                            // reload lại Server UI khi client disconnect
+                            ServerUI.reloadClientDisconnect(this);
                             break;
                         }
 
@@ -410,7 +434,7 @@ public class ListenThread extends Thread {
 //                }
                         }
                         break;
-                        
+
                         case "UPLOAD_FILE_SHARE": {
                             System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
                             Files filesInfo = (Files) request.getObject();
@@ -466,10 +490,22 @@ public class ListenThread extends Thread {
                             HandleResult result = userBLL.authenticate(user);
                             response("response_authenticate", result);
                             if (result.isSuccessed()) {
-                                responseHandleResult(userBLL
-                                        .getAuthenData(result.getFolder().getFolderId(), result.getUser().getEmail()));
-                                responseHandleResult(userBLL.getAuthenDataShare(result.getUser().getEmail()));
-                                registerMemberOnline(result.getUser());
+                                // user ko bị lock quyền anonymous
+                                if (result.getUser().getAnonymousPermission().trim().equals("unlock")) {
+                                    responseHandleResult(userBLL
+                                            .getAuthenData(result.getFolder().getFolderId(), result.getUser().getEmail()));
+                                    responseHandleResult(userBLL.getAuthenDataShare(result.getUser().getEmail()));
+
+                                    // khi user login thành công -> add user vào ds user đang online
+                                    registerMemberOnline(result.getUser());
+                                } else {    // user bị lock quyền anonymous
+                                    responseHandleResult(userBLL
+                                            .getAuthenDataLockAnonymous(result.getFolder().getFolderId(), result.getUser().getEmail()));
+                                    responseHandleResult(userBLL.getAuthenDataShare(result.getUser().getEmail()));
+
+                                    // khi user login thành công -> add user vào ds user đang online
+                                    registerMemberOnline(result.getUser());
+                                }
                             }
 
                             // version_1
@@ -548,10 +584,17 @@ public class ListenThread extends Thread {
                     Logger.getLogger(ListenThread.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+
         } catch (InterruptedException ex) {
             System.err.println("Server error InterruptedException - " + ex);
         } catch (IOException ex) {
             System.err.println("Server error IOException - " + ex);
+        } finally {
+            // Xóa client bị đóng kết nối khỏi ds client đang connect
+            Server.removeClientDisconnect(this);
+
+            // reload lại Server UI khi client disconnect
+            ServerUI.reloadClientDisconnect(this);
         }
     }
 }

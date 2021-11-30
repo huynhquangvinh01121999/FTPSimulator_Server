@@ -89,16 +89,21 @@ public class Server {
     }
 //------------------------------------------------------------------------
 
-    public static ArrayList<ListenThread> getListClient() {
-        return list_Client;
+//------------------- DANH SÁCH CLIENT CONNECT TỚI SERVER ----------------
+    public static void registerClient(ListenThread listenThread) {
+        list_Client.add(listenThread);
     }
 
     public static void removeClientDisconnect(ListenThread listenThread) {
         list_Client.remove(listenThread);
     }
+
+    public static ArrayList<ListenThread> getListClient() {
+        return list_Client;
+    }
 //------------------------------------------------------------------------
 
-//------------------------------------------------------------------------
+//------------------- DANH SÁCH USER THÀNH VIÊN ONLINE -------------------
     public static void registerMemberOnline(MembersOnline member) {
         list_members.add(member);
     }

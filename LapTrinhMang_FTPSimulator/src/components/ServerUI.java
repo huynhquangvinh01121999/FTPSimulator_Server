@@ -2,12 +2,12 @@ package components;
 
 import bll.UserBLL;
 import java.awt.CardLayout;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import models.MembersOnline;
-import models.Users;
 
 /**
  *
@@ -15,9 +15,16 @@ import models.Users;
  */
 public class ServerUI extends javax.swing.JFrame implements Runnable {
 
+    // TABLE MODEL
     private DefaultTableModel tblUserSettingModel;
+    private static DefaultTableModel tblClientConnectAnonymousSettingsModel;
+    private DefaultTableModel tblAllUserAnonymousSettingsModel;
 
+    // CONSTRUCTOR
     private final UserBLL userBLL = new UserBLL();
+
+    // LIST DATA
+    private static List<ListenThread> listenThread = new ArrayList<>();
 
     public ServerUI() {
         initComponents();
@@ -28,16 +35,52 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
 
         // load data table
         loadDataUserSettingModel();
+        loadDataUserAnonymousSettingsModel();
+        loadDataClientConnectionAnonymousSettingsModel();
+
     }
 
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="RELOAD CLIENT IN TABLE MODEL">
+    public static void reloadClientConnect(ListenThread client) {
+        listenThread.add(client);
+
+        // load lại bảng table client
+        loadDataClientConnectionAnonymousSettingsModel();
+    }
+
+    public static void reloadClientDisconnect(ListenThread client) {
+        listenThread.remove(client);
+
+        // load lại bảng table client
+        loadDataClientConnectionAnonymousSettingsModel();
+    }
+    // </editor-fold>
+
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="SET HEADER TABLE">
     private void setDefaultTableModel() {
         tblUserSettingModel = (DefaultTableModel) tblUserSetting.getModel();
         tblUserSettingModel.setColumnIdentifiers(new Object[]{
             "Email", "Trạng thái", "Max size upload", "Max size download", "Quyền", "Quyền rút gọn"
         });
         hiddenColumn(tblUserSetting, 5);
-    }
 
+        tblClientConnectAnonymousSettingsModel = (DefaultTableModel) tblClientConnectAnonymousSettings.getModel();
+        tblClientConnectAnonymousSettingsModel.setColumnIdentifiers(new Object[]{
+            "ID", "Address", "Host name", "Port", "Local port", "Ẩn danh"
+        });
+
+        tblAllUserAnonymousSettingsModel = (DefaultTableModel) tblAllUserAnonymousSettings.getModel();
+        tblAllUserAnonymousSettingsModel.setColumnIdentifiers(new Object[]{
+            "Email", "Chế độ sử dụng chức năng ẩn danh", "AnonymousPermission"
+        });
+        hiddenColumn(tblAllUserAnonymousSettings, 2);
+    }
+    // </editor-fold>
+
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="LOAD DATA INTO TABLE">     
     private void loadDataUserSettingModel() {
         tblUserSettingModel.setRowCount(0);
         userBLL.getAllUser().forEach((user) -> {
@@ -53,6 +96,32 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             });
         });
     }
+
+    private void loadDataUserAnonymousSettingsModel() {
+        tblAllUserAnonymousSettingsModel.setRowCount(0);
+        userBLL.getAllUser().forEach((user) -> {
+            tblAllUserAnonymousSettingsModel.addRow(new Object[]{
+                user.getEmail().trim(),
+                user.getAnonymousPermission().trim().equals("unlock") ? "Cho phép" : "Không cho phép",
+                user.getAnonymousPermission().trim()
+            });
+        });
+
+    }
+
+    private static void loadDataClientConnectionAnonymousSettingsModel() {
+        tblClientConnectAnonymousSettingsModel.setRowCount(0);
+        listenThread.forEach((client) -> {
+            tblClientConnectAnonymousSettingsModel.addRow(new Object[]{
+                client.getSocketId(), client.getSocket().getInetAddress().getHostAddress(),
+                client.getSocket().getInetAddress().getHostName(),
+                client.getSocket().getPort(),
+                client.getSocket().getLocalPort(),
+                client.isANONYMOUS_PERMISSION() ? "Cho phép" : "Không cho phép"
+            });
+        });
+    }
+    // </editor-fold>
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -85,13 +154,24 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         jLabel16 = new javax.swing.JLabel();
         jLabel17 = new javax.swing.JLabel();
         jSpinner2 = new javax.swing.JSpinner();
-        jButton5 = new javax.swing.JButton();
+        btnUpdateCapacityUpload = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
         jLabel18 = new javax.swing.JLabel();
         jLabel19 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         pnlUserPermissions = new javax.swing.JPanel();
         pnlAnonymousSettings = new javax.swing.JPanel();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        tblClientConnectAnonymousSettings = new javax.swing.JTable();
+        jLabel20 = new javax.swing.JLabel();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        tblAllUserAnonymousSettings = new javax.swing.JTable();
+        jLabel21 = new javax.swing.JLabel();
+        jLabel22 = new javax.swing.JLabel();
+        btnUserSettingLockUpload1 = new javax.swing.JButton();
+        btnUserSettingAllowUpload1 = new javax.swing.JButton();
+        btnUserSettingLockUpload2 = new javax.swing.JButton();
+        btnUserSettingAllowUpload2 = new javax.swing.JButton();
         pnlViewUserOnline = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblUserOnlineView = new javax.swing.JTable();
@@ -299,13 +379,18 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
 
         jSpinner2.setModel(new javax.swing.SpinnerNumberModel(Long.valueOf(1L), Long.valueOf(1L), Long.valueOf(100099511627776L), Long.valueOf(1L)));
 
-        jButton5.setBackground(new java.awt.Color(255, 255, 255));
-        jButton5.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon-update-20.png"))); // NOI18N
-        jButton5.setText(" Update");
-        jButton5.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
-        jButton5.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButton5.setFocusPainted(false);
+        btnUpdateCapacityUpload.setBackground(new java.awt.Color(255, 255, 255));
+        btnUpdateCapacityUpload.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnUpdateCapacityUpload.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon-update-20.png"))); // NOI18N
+        btnUpdateCapacityUpload.setText(" Update");
+        btnUpdateCapacityUpload.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
+        btnUpdateCapacityUpload.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnUpdateCapacityUpload.setFocusPainted(false);
+        btnUpdateCapacityUpload.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateCapacityUploadActionPerformed(evt);
+            }
+        });
 
         jButton6.setBackground(new java.awt.Color(255, 255, 255));
         jButton6.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
@@ -314,6 +399,11 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         jButton6.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
         jButton6.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButton6.setFocusPainted(false);
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
 
         jLabel18.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
         jLabel18.setText("(byte)");
@@ -350,7 +440,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                     .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnUpdateCapacityUpload, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(pnlUserSettingsLayout.createSequentialGroup()
@@ -399,7 +489,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                             .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(btnUpdateCapacityUpload, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jLabel18, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
                         .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -430,15 +520,154 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
 
         pnlAnonymousSettings.setBackground(new java.awt.Color(255, 255, 255));
 
+        tblClientConnectAnonymousSettings.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        tblClientConnectAnonymousSettings.setRowHeight(30);
+        jScrollPane4.setViewportView(tblClientConnectAnonymousSettings);
+
+        jLabel20.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
+        jLabel20.setForeground(new java.awt.Color(51, 51, 51));
+        jLabel20.setText("All Users");
+
+        tblAllUserAnonymousSettings.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        tblAllUserAnonymousSettings.setRowHeight(30);
+        jScrollPane5.setViewportView(tblAllUserAnonymousSettings);
+
+        jLabel21.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
+        jLabel21.setForeground(new java.awt.Color(51, 51, 51));
+        jLabel21.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon-online-22.png"))); // NOI18N
+        jLabel21.setText(" Client connected");
+
+        jLabel22.setFont(new java.awt.Font("Thanhoa", 1, 20)); // NOI18N
+        jLabel22.setText("Anonymous Settings");
+
+        btnUserSettingLockUpload1.setBackground(new java.awt.Color(255, 0, 0));
+        btnUserSettingLockUpload1.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnUserSettingLockUpload1.setForeground(new java.awt.Color(255, 255, 255));
+        btnUserSettingLockUpload1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon-lock-22.png"))); // NOI18N
+        btnUserSettingLockUpload1.setText(" Lock");
+        btnUserSettingLockUpload1.setBorderPainted(false);
+        btnUserSettingLockUpload1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnUserSettingLockUpload1.setFocusPainted(false);
+        btnUserSettingLockUpload1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUserSettingLockUpload1ActionPerformed(evt);
+            }
+        });
+
+        btnUserSettingAllowUpload1.setBackground(new java.awt.Color(51, 204, 0));
+        btnUserSettingAllowUpload1.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnUserSettingAllowUpload1.setForeground(new java.awt.Color(255, 255, 255));
+        btnUserSettingAllowUpload1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon-unlock-22.png"))); // NOI18N
+        btnUserSettingAllowUpload1.setText(" Unlock");
+        btnUserSettingAllowUpload1.setBorderPainted(false);
+        btnUserSettingAllowUpload1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnUserSettingAllowUpload1.setFocusPainted(false);
+        btnUserSettingAllowUpload1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUserSettingAllowUpload1ActionPerformed(evt);
+            }
+        });
+
+        btnUserSettingLockUpload2.setBackground(new java.awt.Color(255, 0, 0));
+        btnUserSettingLockUpload2.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnUserSettingLockUpload2.setForeground(new java.awt.Color(255, 255, 255));
+        btnUserSettingLockUpload2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon-lock-22.png"))); // NOI18N
+        btnUserSettingLockUpload2.setText(" Lock");
+        btnUserSettingLockUpload2.setBorderPainted(false);
+        btnUserSettingLockUpload2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnUserSettingLockUpload2.setFocusPainted(false);
+        btnUserSettingLockUpload2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUserSettingLockUpload2ActionPerformed(evt);
+            }
+        });
+
+        btnUserSettingAllowUpload2.setBackground(new java.awt.Color(51, 204, 0));
+        btnUserSettingAllowUpload2.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnUserSettingAllowUpload2.setForeground(new java.awt.Color(255, 255, 255));
+        btnUserSettingAllowUpload2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon-unlock-22.png"))); // NOI18N
+        btnUserSettingAllowUpload2.setText(" Unlock");
+        btnUserSettingAllowUpload2.setBorderPainted(false);
+        btnUserSettingAllowUpload2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnUserSettingAllowUpload2.setFocusPainted(false);
+        btnUserSettingAllowUpload2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUserSettingAllowUpload2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout pnlAnonymousSettingsLayout = new javax.swing.GroupLayout(pnlAnonymousSettings);
         pnlAnonymousSettings.setLayout(pnlAnonymousSettingsLayout);
         pnlAnonymousSettingsLayout.setHorizontalGroup(
             pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 790, Short.MAX_VALUE)
+            .addGroup(pnlAnonymousSettingsLayout.createSequentialGroup()
+                .addGroup(pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlAnonymousSettingsLayout.createSequentialGroup()
+                        .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlAnonymousSettingsLayout.createSequentialGroup()
+                        .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 99, Short.MAX_VALUE)
+                        .addGroup(pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnUserSettingAllowUpload1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnUserSettingLockUpload1, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(32, 32, 32)
+                        .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(139, 139, 139)
+                        .addGroup(pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnUserSettingAllowUpload2, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
+                            .addComponent(btnUserSettingLockUpload2, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE))))
+                .addContainerGap())
+            .addGroup(pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(pnlAnonymousSettingsLayout.createSequentialGroup()
+                    .addGap(0, 0, Short.MAX_VALUE)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 370, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(32, 32, 32)
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 378, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(0, 10, Short.MAX_VALUE)))
         );
         pnlAnonymousSettingsLayout.setVerticalGroup(
             pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 490, Short.MAX_VALUE)
+            .addGroup(pnlAnonymousSettingsLayout.createSequentialGroup()
+                .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlAnonymousSettingsLayout.createSequentialGroup()
+                        .addGap(140, 140, 140)
+                        .addGroup(pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(pnlAnonymousSettingsLayout.createSequentialGroup()
+                        .addGap(77, 77, 77)
+                        .addGroup(pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(pnlAnonymousSettingsLayout.createSequentialGroup()
+                                .addComponent(btnUserSettingLockUpload2, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btnUserSettingAllowUpload2, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(pnlAnonymousSettingsLayout.createSequentialGroup()
+                                .addComponent(btnUserSettingLockUpload1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btnUserSettingAllowUpload1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addContainerGap(295, Short.MAX_VALUE))
+            .addGroup(pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(pnlAnonymousSettingsLayout.createSequentialGroup()
+                    .addGap(0, 204, Short.MAX_VALUE)
+                    .addGroup(pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 286, Short.MAX_VALUE)
+                        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))))
         );
 
         pnlSection.add(pnlAnonymousSettings, "pnlAnonymousSettings");
@@ -558,6 +787,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
 
     private void jLabel9MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel9MouseClicked
         tranferLayout("pnlAnonymousSettings");
+        loadDataClientConnectionAnonymousSettingsModel();
     }//GEN-LAST:event_jLabel9MouseClicked
 
     private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
@@ -579,7 +809,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         userBLL.UpdatePermissionForUser(email, "d");
                         Message("Chức năng upload của user " + email + " đã bị khóa.!!!");
                         loadDataUserSettingModel();
-                        handleUpdateDataClientThread(email, "update_lock_unlock_features_file", "d;Chức năng upload của bạn đã bị khóa");
+                        handleUpdateDataClientThread(email, "update_lock_unlock_features", "d;Chức năng upload của bạn đã bị khóa");
                     } catch (Exception ex) {
                         Message("Đã xảy ra lỗi khi lock user upload file.!!!");
                         System.err.println("Đã xảy ra lỗi khi lock user upload file - " + ex);
@@ -591,7 +821,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         userBLL.UpdatePermissionForUser(email, "r");
                         Message("Chức năng upload của user " + email + " đã bị khóa.!!!");
                         loadDataUserSettingModel();
-                        handleUpdateDataClientThread(email, "update_lock_unlock_features_file", "r;Chức năng upload của bạn đã bị khóa");
+                        handleUpdateDataClientThread(email, "update_lock_unlock_features", "r;Chức năng upload của bạn đã bị khóa");
                     } catch (Exception ex) {
                         Message("Đã xảy ra lỗi khi lock user upload file.!!!");
                         System.err.println("Đã xảy ra lỗi khi lock user upload file - " + ex);
@@ -620,7 +850,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         userBLL.UpdatePermissionForUser(email, "all");
                         Message("Đã mở khóa chức năng upload cho user " + email);
                         loadDataUserSettingModel();
-                        handleUpdateDataClientThread(email, "update_lock_unlock_features_file", "all;Giờ đây bạn đã có thể sử dụng chức năng upload");
+                        handleUpdateDataClientThread(email, "update_lock_unlock_features", "all;Giờ đây bạn đã có thể sử dụng chức năng upload");
                     } catch (Exception ex) {
                         Message("Đã xảy ra lỗi khi unlock user upload file.!!!");
                         System.err.println("Đã xảy ra lỗi khi unlock user upload file - " + ex);
@@ -632,7 +862,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         userBLL.UpdatePermissionForUser(email, "u");
                         Message("Đã mở khóa chức năng upload cho user " + email);
                         loadDataUserSettingModel();
-                        handleUpdateDataClientThread(email, "update_lock_unlock_features_file", "u;Giờ đây bạn đã có thể sử dụng chức năng upload");
+                        handleUpdateDataClientThread(email, "update_lock_unlock_features", "u;Giờ đây bạn đã có thể sử dụng chức năng upload");
                     } catch (Exception ex) {
                         Message("Đã xảy ra lỗi khi unlock user upload file.!!!");
                         System.err.println("Đã xảy ra lỗi khi unlock user upload file - " + ex);
@@ -661,7 +891,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         userBLL.UpdatePermissionForUser(email, "u");
                         Message("Chức năng download của user " + email + " đã bị khóa.!!!");
                         loadDataUserSettingModel();
-                        handleUpdateDataClientThread(email, "update_lock_unlock_features_file", "u;Chức năng download của bạn đã bị khóa");
+                        handleUpdateDataClientThread(email, "update_lock_unlock_features", "u;Chức năng download của bạn đã bị khóa");
                     } catch (Exception ex) {
                         Message("Đã xảy ra lỗi khi lock user download file.!!!");
                         System.err.println("Đã xảy ra lỗi khi lock user download file - " + ex);
@@ -673,7 +903,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         userBLL.UpdatePermissionForUser(email, "r");
                         Message("Chức năng download của user " + email + " đã bị khóa.!!!");
                         loadDataUserSettingModel();
-                        handleUpdateDataClientThread(email, "update_lock_unlock_features_file", "r;Chức năng download của bạn đã bị khóa");
+                        handleUpdateDataClientThread(email, "update_lock_unlock_features", "r;Chức năng download của bạn đã bị khóa");
                     } catch (Exception ex) {
                         Message("Đã xảy ra lỗi khi lock user download file.!!!");
                         System.err.println("Đã xảy ra lỗi khi lock user download file - " + ex);
@@ -702,7 +932,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         userBLL.UpdatePermissionForUser(email, "all");
                         Message("Đã mở khóa chức năng download cho user " + email);
                         loadDataUserSettingModel();
-                        handleUpdateDataClientThread(email, "update_lock_unlock_features_file", "all;Giờ đây bạn đã có thể sử dụng chức năng download");
+                        handleUpdateDataClientThread(email, "update_lock_unlock_features", "all;Giờ đây bạn đã có thể sử dụng chức năng download");
                     } catch (Exception ex) {
                         Message("Đã xảy ra lỗi khi unlock user download file.!!!");
                         System.err.println("Đã xảy ra lỗi khi unlock user download file - " + ex);
@@ -714,7 +944,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         userBLL.UpdatePermissionForUser(email, "d");
                         Message("Đã mở khóa chức năng download cho user " + email);
                         loadDataUserSettingModel();
-                        handleUpdateDataClientThread(email, "update_lock_unlock_features_file", "d;Giờ đây bạn đã có thể sử dụng chức năng download");
+                        handleUpdateDataClientThread(email, "update_lock_unlock_features", "d;Giờ đây bạn đã có thể sử dụng chức năng download");
                     } catch (Exception ex) {
                         Message("Đã xảy ra lỗi khi unlock user download file.!!!");
                         System.err.println("Đã xảy ra lỗi khi unlock user download file - " + ex);
@@ -732,8 +962,104 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         handleUpdateDataClientThread("huynhquangvinh1999@gmail.com", "test_from_serverui", "xin chào");
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void btnUpdateCapacityUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateCapacityUploadActionPerformed
+        int selectedRow = tblUserSetting.getSelectedRow();
+        if (selectedRow == -1) {
+            Message("Vui lòng chọn user cần cấu hình kích thước file upload.!!!");
+        } else {
+            String email = tblUserSetting.getValueAt(selectedRow, 0).toString();
+            long value = (long) jSpinner1.getValue();
+            userBLL.UpdateFileSizeUpload(email, value);
+            Message("Cập nhật thành công.!!!");
+        }
+    }//GEN-LAST:event_btnUpdateCapacityUploadActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        int selectedRow = tblUserSetting.getSelectedRow();
+        if (selectedRow == -1) {
+            Message("Vui lòng chọn user cần cấu hình kích thước file upload.!!!");
+        } else {
+            String email = tblUserSetting.getValueAt(selectedRow, 0).toString();
+            long value = (long) jSpinner2.getValue();
+            userBLL.UpdateFileSizeDownload(email, value);
+            Message("Cập nhật thành công.!!!");
+        }
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void btnUserSettingLockUpload1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUserSettingLockUpload1ActionPerformed
+        int selectedRow = tblClientConnectAnonymousSettings.getSelectedRow();
+        if (selectedRow == -1) {
+            Message("Vui lòng chọn client muốn chặn chức năng anonymous.!!!");
+        } else {
+            String address = tblClientConnectAnonymousSettings.getValueAt(selectedRow, 1).toString();
+            String port = tblClientConnectAnonymousSettings.getValueAt(selectedRow, 3).toString();
+
+            handleUpdateDataClientThreadWithPort(port, "update_client_anonymous_permission", false);
+            Message("Đã chặn chức năng anonymous của client có thông tin:\nAddress: "
+                    + address + "\nPort: " + port);
+
+            // update lại quyền trên table
+            for (ListenThread client : listenThread) {
+                if (String.valueOf(client.getSocket().getPort()).equals(port)) {
+                    client.setANONYMOUS_PERMISSION(false);
+                    break;
+                }
+            }
+            loadDataClientConnectionAnonymousSettingsModel();
+        }
+    }//GEN-LAST:event_btnUserSettingLockUpload1ActionPerformed
+
+    private void btnUserSettingAllowUpload1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUserSettingAllowUpload1ActionPerformed
+        int selectedRow = tblClientConnectAnonymousSettings.getSelectedRow();
+        if (selectedRow == -1) {
+            Message("Vui lòng chọn client muốn kích hoạt chức năng anonymous.!!!");
+        } else {
+            String address = tblClientConnectAnonymousSettings.getValueAt(selectedRow, 1).toString();
+            String port = tblClientConnectAnonymousSettings.getValueAt(selectedRow, 3).toString();
+
+            handleUpdateDataClientThreadWithPort(port, "update_client_anonymous_permission", true);
+            Message("Đã kích hoạt chức năng anonymous của client có thông tin:\nAddress: "
+                    + address + "\nPort: " + port);
+
+            // update lại quyền trên table
+            for (ListenThread client : listenThread) {
+                if (String.valueOf(client.getSocket().getPort()).equals(port)) {
+                    client.setANONYMOUS_PERMISSION(true);
+                    break;
+                }
+            }
+            loadDataClientConnectionAnonymousSettingsModel();
+        }
+    }//GEN-LAST:event_btnUserSettingAllowUpload1ActionPerformed
+
+    private void btnUserSettingLockUpload2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUserSettingLockUpload2ActionPerformed
+        int selectedRow = tblAllUserAnonymousSettings.getSelectedRow();
+        if (selectedRow == -1) {
+            Message("Vui lòng chọn user muốn chặn chức năng anonymous.!!!");
+        } else {
+            String email = tblAllUserAnonymousSettings.getValueAt(selectedRow, 0).toString();
+            userBLL.UpdateAnonymousPermission(email, "lock");
+            handleUpdateDataClientThread(email, "lock_user_anonymous_permission", "lock;Quyền truy cập anonymous của bạn đã bị vô hiệu hóa.!!!");
+            Message("Đã chặn chức năng anonymous của user " + email);
+            loadDataUserAnonymousSettingsModel();
+        }
+    }//GEN-LAST:event_btnUserSettingLockUpload2ActionPerformed
+
+    private void btnUserSettingAllowUpload2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUserSettingAllowUpload2ActionPerformed
+        int selectedRow = tblAllUserAnonymousSettings.getSelectedRow();
+        if (selectedRow == -1) {
+            Message("Vui lòng chọn user muốn kích hoạt chức năng anonymous.!!!");
+        } else {
+            String email = tblAllUserAnonymousSettings.getValueAt(selectedRow, 0).toString();
+            userBLL.UpdateAnonymousPermission(email, "unlock");
+            handleUpdateDataClientThread(email, "unlock_user_anonymous_permission", "unlock;Giờ đây bạn đã có thể sử dụng chức năng anonymous.!!!");
+            Message("Đã kích hoạt chức năng anonymous của user " + email);
+            loadDataUserAnonymousSettingsModel();
+        }
+    }//GEN-LAST:event_btnUserSettingAllowUpload2ActionPerformed
+
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Gửi data update qua cho client đc chỉ định trước">
+    // <editor-fold defaultstate="collapsed" desc="Gửi data update qua cho user đc chỉ định email trước">
     private void handleUpdateDataClientThread(String email, String message, Object object) {
         if (Server.getMembersOnline() != null) {     // kiểm tra khác null
             for (MembersOnline member : Server.getMembersOnline()) {
@@ -741,6 +1067,18 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                     member.getListenThread().response(message, object);
                     break;
                 }
+            }
+        }
+    }
+    //</editor-fold>
+
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Gửi data update qua cho client so sánh theo port">
+    private void handleUpdateDataClientThreadWithPort(String port, String message, Object object) {
+        for (ListenThread client : listenThread) {
+            if (String.valueOf(client.getSocket().getPort()).equals(port)) {
+                client.response(message, object);
+                break;
             }
         }
     }
@@ -778,12 +1116,16 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel background;
+    private javax.swing.JButton btnUpdateCapacityUpload;
     private javax.swing.JButton btnUserSettingAllowDownload;
     private javax.swing.JButton btnUserSettingAllowUpload;
+    private javax.swing.JButton btnUserSettingAllowUpload1;
+    private javax.swing.JButton btnUserSettingAllowUpload2;
     private javax.swing.JButton btnUserSettingLockDownload;
     private javax.swing.JButton btnUserSettingLockUpload;
+    private javax.swing.JButton btnUserSettingLockUpload1;
+    private javax.swing.JButton btnUserSettingLockUpload2;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -797,6 +1139,9 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -807,6 +1152,8 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSpinner jSpinner1;
     private javax.swing.JSpinner jSpinner2;
@@ -816,7 +1163,9 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
     private javax.swing.JPanel pnlUserPermissions;
     private javax.swing.JPanel pnlUserSettings;
     private javax.swing.JPanel pnlViewUserOnline;
+    private javax.swing.JTable tblAllUserAnonymousSettings;
     private javax.swing.JTable tblAllUserView;
+    private javax.swing.JTable tblClientConnectAnonymousSettings;
     private javax.swing.JTable tblUserOnlineView;
     private javax.swing.JTable tblUserSetting;
     // End of variables declaration//GEN-END:variables

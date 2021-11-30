@@ -33,6 +33,18 @@ public class UserBLL {
     public boolean UpdatePermissionForUser(String email, String perId){
         return userServices.UpdatePerId(email, perId);
     }
+    
+    public boolean UpdateFileSizeUpload(String email, long size){
+        return userServices.UpdateCapacity("FileSizeUpload", email, String.valueOf(size));
+    }
+    
+    public boolean UpdateFileSizeDownload(String email, long size){
+        return userServices.UpdateCapacity("FileSizeDownload", email, String.valueOf(size));
+    }
+    
+    public boolean UpdateAnonymousPermission(String email, String per){
+        return userServices.UpdateAnonymousPermission(email, per);
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Register">
@@ -105,6 +117,19 @@ public class UserBLL {
 
         // thêm toàn bộ file anonymous vào trong list file info
         listFileInfo.addAll(listFileAnonymous);
+
+        return new HandleResult(listFolderChildInfo, listFileInfo);
+    }
+    
+    public HandleResult getAuthenDataLockAnonymous(String folderParentId, String email) {
+        // lấy ra danh sách các folder con
+        List<Folders> listFolderChildInfo = new ArrayList<>();
+        listFolderChildInfo = folderServices.FindListChildFolder(folderParentId);
+
+        // lấy ra toàn bộ tất cả các file của user + anonymous
+        String prexEmail = email.split("@")[0];
+        List<Files> listFileInfo = new ArrayList<>();
+        listFileInfo = new FileBLL().GetFilesByPrexEmail(prexEmail);
 
         return new HandleResult(listFolderChildInfo, listFileInfo);
     }

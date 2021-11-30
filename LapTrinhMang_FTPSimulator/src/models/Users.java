@@ -14,9 +14,9 @@ import java.io.Serializable;
 public class Users implements Serializable {
 
     private String Email, Password, FullName, Sex, Dob, Status,
-            CreateAt, FileSizeUpload, FileSizeDownload, PermissionId;
+            CreateAt, FileSizeUpload, FileSizeDownload, PermissionId, AnonymousPermission;
 
-    public Users(String Email, String Password, String FullName, String Sex, String Dob, String Status, String CreateAt, String FileSizeUpload, String FileSizeDownload, String PermissionId) {
+    public Users(String Email, String Password, String FullName, String Sex, String Dob, String Status, String CreateAt, String FileSizeUpload, String FileSizeDownload, String PermissionId, String AnonymousPermission) {
         this.Email = Email;
         this.Password = Password;
         this.FullName = FullName;
@@ -27,9 +27,18 @@ public class Users implements Serializable {
         this.FileSizeUpload = FileSizeUpload;
         this.FileSizeDownload = FileSizeDownload;
         this.PermissionId = PermissionId;
+        this.AnonymousPermission = AnonymousPermission;
     }
 
     public Users() {
+    }
+
+    public String getAnonymousPermission() {
+        return AnonymousPermission;
+    }
+
+    public void setAnonymousPermission(String AnonymousPermission) {
+        this.AnonymousPermission = AnonymousPermission;
     }
 
     public String getPermissionId() {

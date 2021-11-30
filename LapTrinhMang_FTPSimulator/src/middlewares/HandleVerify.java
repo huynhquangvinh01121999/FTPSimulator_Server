@@ -26,7 +26,7 @@ public class HandleVerify {
 
     // func check author unblock???
     public static HandleResult verifyAuthorUnblock(String email) {
-        boolean checkStatusAuthorResult = new UserServices().CheckStatusAuthor(email, "unblock");
+        boolean checkStatusAuthorResult = new UserServices().CheckStatusAuthor(email, "unlock");
         if (checkStatusAuthorResult) {
             return new HandleResult(true);
         }
