@@ -26,7 +26,7 @@ public class FolderServices extends BaseServices implements IServices<Folders> {
     public List<Folders> GetAll() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
     @Override
     public Folders Find(String value) {
         try {
@@ -44,6 +44,8 @@ public class FolderServices extends BaseServices implements IServices<Folders> {
                 folder.setSize(rs.getString(5));
                 folder.setRemainingSize(rs.getString(6));
                 folder.setCreateAt(rs.getString(7));
+                folder.setFolderParentId(rs.getString(8));
+                folder.setFolderUserPermission(rs.getString(9));
                 return folder;
             }
         } catch (SQLException ex) {
@@ -102,6 +104,7 @@ public class FolderServices extends BaseServices implements IServices<Folders> {
                 folder.setRemainingSize(rs.getString(6));
                 folder.setCreateAt(rs.getString(7));
                 folder.setFolderParentId(rs.getString(8));
+                folder.setFolderUserPermission(rs.getString(9));
 
                 return folder;
             }
@@ -137,6 +140,7 @@ public class FolderServices extends BaseServices implements IServices<Folders> {
                 folder.setRemainingSize(rs.getString(6));
                 folder.setCreateAt(rs.getString(7));
                 folder.setFolderParentId(rs.getString(8));
+                folder.setFolderUserPermission(rs.getString(9));
 
                 list.add(folder);
             }
@@ -152,6 +156,21 @@ public class FolderServices extends BaseServices implements IServices<Folders> {
             }
         }
         return list;
+    }
+    
+    public boolean UpdateFolderSize(String size, String folderId) {
+        try {
+            String sql = "update folders set Size = ? where FolderId = ?";
+            dbContext = GetConnection.getInstance().getConn();
+            ps = dbContext.prepareStatement(sql);
+            ps.setString(1, size);
+            ps.setString(2, folderId);
+            ps.execute();
+            return true;
+        } catch (SQLException ex) {
+            System.err.println("Xảy ra lỗi khi update dung lượng lưu trữ của thư mục" + ex);
+            return false;
+        }
     }
 
     public boolean UpdateRemainingSize(String remainSize, String folderId) {
@@ -183,6 +202,21 @@ public class FolderServices extends BaseServices implements IServices<Folders> {
             System.out.println("Xảy ra lỗi khi cập nhật thông tin file - " + ex);
         }
         return null;
+    }
+    
+    public boolean UpdateFolderUserPermission(String folderId, String permission) {
+        try {
+            String sql = "update folders set FolderUserPermission = ? where FolderId = ?";
+            dbContext = GetConnection.getInstance().getConn();
+            ps = dbContext.prepareStatement(sql);
+            ps.setString(1, permission);
+            ps.setString(2, folderId);
+            ps.execute();
+            return true;
+        } catch (SQLException ex) {
+            System.err.println("Xảy ra lỗi khi update quyền user của thư mục" + ex);
+            return false;
+        }
     }
 
     public static void main(String[] args) {

@@ -1,5 +1,6 @@
 package components;
 
+import bll.FolderBLL;
 import bll.UserBLL;
 import java.awt.CardLayout;
 import java.util.ArrayList;
@@ -7,6 +8,8 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import models.FolderUserItem;
+import models.Folders;
 import models.MembersOnline;
 
 /**
@@ -19,12 +22,15 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
     private DefaultTableModel tblUserSettingModel;
     private static DefaultTableModel tblClientConnectAnonymousSettingsModel;
     private DefaultTableModel tblAllUserAnonymousSettingsModel;
+    private DefaultTableModel tblAllUserOfUserPermissionModel;
+    private DefaultTableModel tblFolderOwnOfUserModel;
 
     // CONSTRUCTOR
     private final UserBLL userBLL = new UserBLL();
 
     // LIST DATA
     private static List<ListenThread> listenThread = new ArrayList<>();
+    private static List<Folders> folderChildOfUser = new ArrayList<>();
 
     public ServerUI() {
         initComponents();
@@ -37,6 +43,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         loadDataUserSettingModel();
         loadDataUserAnonymousSettingsModel();
         loadDataClientConnectionAnonymousSettingsModel();
+        loadDataUserPermissionModel();
 
     }
 
@@ -76,6 +83,17 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             "Email", "Chế độ sử dụng chức năng ẩn danh", "AnonymousPermission"
         });
         hiddenColumn(tblAllUserAnonymousSettings, 2);
+
+        tblAllUserOfUserPermissionModel = (DefaultTableModel) tblAllUserOfUserPermission.getModel();
+        tblAllUserOfUserPermissionModel.setColumnIdentifiers(new Object[]{
+            "Email", "Tên người dùng", "Trạng thái"
+        });
+
+        tblFolderOwnOfUserModel = (DefaultTableModel) tblFolderOwnOfUser.getModel();
+        tblFolderOwnOfUserModel.setColumnIdentifiers(new Object[]{
+            "FolderID", "Tên thư mục", "Chủ sở hữu", "Quyền user"
+        });
+        hiddenColumn(tblFolderOwnOfUser, 0);
     }
     // </editor-fold>
 
@@ -86,7 +104,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         userBLL.getAllUser().forEach((user) -> {
             tblUserSettingModel.addRow(new Object[]{
                 user.getEmail().trim(),
-                user.getStatus().trim().equals("unblock") ? "Active" : "Bị khóa",
+                user.getStatus().trim().equals("unlock") ? "Active" : "Bị khóa",
                 Long.parseLong(user.getFileSizeUpload().trim()) / 1024 + "KB",
                 Long.parseLong(user.getFileSizeDownload().trim()) / 1024 + "KB",
                 user.getPermissionId().trim().equals("all") ? "All"
@@ -121,8 +139,17 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             });
         });
     }
-    // </editor-fold>
 
+    private void loadDataUserPermissionModel() {
+        tblAllUserOfUserPermissionModel.setRowCount(0);
+        userBLL.getAllUser().forEach((user) -> {
+            tblAllUserOfUserPermissionModel.addRow(new Object[]{
+                user.getEmail(), user.getFullName(),
+                user.getStatus().trim().equals("unlock") ? "Active" : "Bị khóa",});
+        });
+    }
+
+    // </editor-fold>
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -159,7 +186,23 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         jLabel18 = new javax.swing.JLabel();
         jLabel19 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        jLabel27 = new javax.swing.JLabel();
+        jSpinner3 = new javax.swing.JSpinner();
+        jLabel28 = new javax.swing.JLabel();
+        btnUpdateCapacityUpload1 = new javax.swing.JButton();
+        jLabel29 = new javax.swing.JLabel();
         pnlUserPermissions = new javax.swing.JPanel();
+        jScrollPane6 = new javax.swing.JScrollPane();
+        tblAllUserOfUserPermission = new javax.swing.JTable();
+        jLabel23 = new javax.swing.JLabel();
+        jLabel24 = new javax.swing.JLabel();
+        jSeparator3 = new javax.swing.JSeparator();
+        jScrollPane7 = new javax.swing.JScrollPane();
+        tblFolderOwnOfUser = new javax.swing.JTable();
+        jLabel25 = new javax.swing.JLabel();
+        jLabel26 = new javax.swing.JLabel();
+        btnUserSettingLockUpload3 = new javax.swing.JButton();
+        btnUserSettingAllowUpload3 = new javax.swing.JButton();
         pnlAnonymousSettings = new javax.swing.JPanel();
         jScrollPane4 = new javax.swing.JScrollPane();
         tblClientConnectAnonymousSettings = new javax.swing.JTable();
@@ -172,6 +215,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         btnUserSettingAllowUpload1 = new javax.swing.JButton();
         btnUserSettingLockUpload2 = new javax.swing.JButton();
         btnUserSettingAllowUpload2 = new javax.swing.JButton();
+        jSeparator2 = new javax.swing.JSeparator();
         pnlViewUserOnline = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblUserOnlineView = new javax.swing.JTable();
@@ -364,7 +408,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
 
         jLabel15.setFont(new java.awt.Font("Tahoma", 0, 13)); // NOI18N
         jLabel15.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel15.setText("Setting max capacity (max 100TB = 100,099,511,627,776 byte):");
+        jLabel15.setText("Setting max capacity:");
         jLabel15.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
 
         jSpinner1.setModel(new javax.swing.SpinnerNumberModel(Long.valueOf(1L), Long.valueOf(1L), Long.valueOf(100099511627776L), Long.valueOf(1L)));
@@ -418,6 +462,32 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             }
         });
 
+        jLabel27.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jLabel27.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel27.setText("Max storage capacity:");
+
+        jSpinner3.setModel(new javax.swing.SpinnerNumberModel(Long.valueOf(1L), Long.valueOf(1L), Long.valueOf(100099511627776L), Long.valueOf(1L)));
+
+        jLabel28.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
+        jLabel28.setText("(byte)");
+
+        btnUpdateCapacityUpload1.setBackground(new java.awt.Color(255, 255, 255));
+        btnUpdateCapacityUpload1.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnUpdateCapacityUpload1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon-update-20.png"))); // NOI18N
+        btnUpdateCapacityUpload1.setText(" Update");
+        btnUpdateCapacityUpload1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
+        btnUpdateCapacityUpload1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnUpdateCapacityUpload1.setFocusPainted(false);
+        btnUpdateCapacityUpload1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateCapacityUpload1ActionPerformed(evt);
+            }
+        });
+
+        jLabel29.setFont(new java.awt.Font("Tahoma", 0, 9)); // NOI18N
+        jLabel29.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel29.setText("(max 100TB = 100,099,511,627,776 byte):");
+
         javax.swing.GroupLayout pnlUserSettingsLayout = new javax.swing.GroupLayout(pnlUserSettings);
         pnlUserSettings.setLayout(pnlUserSettingsLayout);
         pnlUserSettingsLayout.setHorizontalGroup(
@@ -425,26 +495,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             .addComponent(jScrollPane3)
             .addComponent(jSeparator1)
             .addGroup(pnlUserSettingsLayout.createSequentialGroup()
-                .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel17, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jSpinner1)
-                    .addComponent(jSpinner2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnUpdateCapacityUpload, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(pnlUserSettingsLayout.createSequentialGroup()
-                .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(pnlUserSettingsLayout.createSequentialGroup()
                         .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -459,7 +510,37 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(btnUserSettingAllowDownload, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnUserSettingAllowUpload, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 386, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(pnlUserSettingsLayout.createSequentialGroup()
+                        .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(pnlUserSettingsLayout.createSequentialGroup()
+                                .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jLabel17, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jSpinner1)
+                                    .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(btnUpdateCapacityUpload, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(pnlUserSettingsLayout.createSequentialGroup()
+                                .addComponent(jLabel27, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jSpinner3, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel28, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(btnUpdateCapacityUpload1, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel29, javax.swing.GroupLayout.PREFERRED_SIZE, 490, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addGap(0, 65, Short.MAX_VALUE))
         );
         pnlUserSettingsLayout.setVerticalGroup(
@@ -474,17 +555,19 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                     .addComponent(btnUserSettingLockDownload, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnUserSettingAllowDownload, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(pnlUserSettingsLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel13)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
-                    .addGroup(pnlUserSettingsLayout.createSequentialGroup()
-                        .addGap(18, 18, 18)
+                        .addComponent(jLabel29)
+                        .addGap(1, 1, 1)
+                        .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jSpinner3, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel27, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnUpdateCapacityUpload1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel28, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(14, 14, 14)
                         .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -496,8 +579,12 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                             .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)))
+                            .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlUserSettingsLayout.createSequentialGroup()
+                        .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel13)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 249, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
@@ -505,15 +592,130 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
 
         pnlUserPermissions.setBackground(new java.awt.Color(255, 255, 255));
 
+        tblAllUserOfUserPermission.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        tblAllUserOfUserPermission.setRowHeight(30);
+        tblAllUserOfUserPermission.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblAllUserOfUserPermissionMouseClicked(evt);
+            }
+        });
+        jScrollPane6.setViewportView(tblAllUserOfUserPermission);
+
+        jLabel23.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
+        jLabel23.setForeground(new java.awt.Color(51, 51, 51));
+        jLabel23.setText("All Users");
+
+        jLabel24.setFont(new java.awt.Font("Thanhoa", 1, 20)); // NOI18N
+        jLabel24.setText("User Permission Use Folder");
+
+        tblFolderOwnOfUser.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        tblFolderOwnOfUser.setRowHeight(30);
+        jScrollPane7.setViewportView(tblFolderOwnOfUser);
+
+        jLabel25.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
+        jLabel25.setForeground(new java.awt.Color(51, 51, 51));
+        jLabel25.setText("Folder own:");
+
+        jLabel26.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        jLabel26.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel26.setText("<=>");
+
+        btnUserSettingLockUpload3.setBackground(new java.awt.Color(255, 0, 0));
+        btnUserSettingLockUpload3.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnUserSettingLockUpload3.setForeground(new java.awt.Color(255, 255, 255));
+        btnUserSettingLockUpload3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon-lock-22.png"))); // NOI18N
+        btnUserSettingLockUpload3.setText(" Lock user permission");
+        btnUserSettingLockUpload3.setBorderPainted(false);
+        btnUserSettingLockUpload3.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnUserSettingLockUpload3.setFocusPainted(false);
+        btnUserSettingLockUpload3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUserSettingLockUpload3ActionPerformed(evt);
+            }
+        });
+
+        btnUserSettingAllowUpload3.setBackground(new java.awt.Color(51, 204, 0));
+        btnUserSettingAllowUpload3.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnUserSettingAllowUpload3.setForeground(new java.awt.Color(255, 255, 255));
+        btnUserSettingAllowUpload3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon-unlock-22.png"))); // NOI18N
+        btnUserSettingAllowUpload3.setText(" Unlock user permission");
+        btnUserSettingAllowUpload3.setBorderPainted(false);
+        btnUserSettingAllowUpload3.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnUserSettingAllowUpload3.setFocusPainted(false);
+        btnUserSettingAllowUpload3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUserSettingAllowUpload3ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout pnlUserPermissionsLayout = new javax.swing.GroupLayout(pnlUserPermissions);
         pnlUserPermissions.setLayout(pnlUserPermissionsLayout);
         pnlUserPermissionsLayout.setHorizontalGroup(
             pnlUserPermissionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 790, Short.MAX_VALUE)
+            .addGroup(pnlUserPermissionsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlUserPermissionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlUserPermissionsLayout.createSequentialGroup()
+                        .addGroup(pnlUserPermissionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(pnlUserPermissionsLayout.createSequentialGroup()
+                                .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabel26, javax.swing.GroupLayout.DEFAULT_SIZE, 32, Short.MAX_VALUE)))
+                        .addGap(18, 18, 18)
+                        .addGroup(pnlUserPermissionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(pnlUserPermissionsLayout.createSequentialGroup()
+                        .addGroup(pnlUserPermissionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 282, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlUserPermissionsLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(pnlUserPermissionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnUserSettingAllowUpload3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
+                            .addComponent(btnUserSettingLockUpload3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addContainerGap())
         );
         pnlUserPermissionsLayout.setVerticalGroup(
             pnlUserPermissionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 490, Short.MAX_VALUE)
+            .addGroup(pnlUserPermissionsLayout.createSequentialGroup()
+                .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnUserSettingLockUpload3, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnUserSettingAllowUpload3, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(9, 9, 9)
+                .addGroup(pnlUserPermissionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(pnlUserPermissionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlUserPermissionsLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pnlUserPermissionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 318, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 318, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(pnlUserPermissionsLayout.createSequentialGroup()
+                        .addGap(138, 138, 138)
+                        .addComponent(jLabel26, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
 
         pnlSection.add(pnlUserPermissions, "pnlUserPermissions");
@@ -616,9 +818,6 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAnonymousSettingsLayout.createSequentialGroup()
                 .addGroup(pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlAnonymousSettingsLayout.createSequentialGroup()
-                        .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlAnonymousSettingsLayout.createSequentialGroup()
                         .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 99, Short.MAX_VALUE)
@@ -630,7 +829,12 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         .addGap(139, 139, 139)
                         .addGroup(pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(btnUserSettingAllowUpload2, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
-                            .addComponent(btnUserSettingLockUpload2, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE))))
+                            .addComponent(btnUserSettingLockUpload2, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)))
+                    .addGroup(pnlAnonymousSettingsLayout.createSequentialGroup()
+                        .addGroup(pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
             .addGroup(pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(pnlAnonymousSettingsLayout.createSequentialGroup()
@@ -646,7 +850,9 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                 .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(pnlAnonymousSettingsLayout.createSequentialGroup()
-                        .addGap(140, 140, 140)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(124, 124, 124)
                         .addGroup(pnlAnonymousSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -783,6 +989,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
 
     private void jLabel10MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel10MouseClicked
         tranferLayout("pnlUserPermissions");
+        loadDataUserPermissionModel();
     }//GEN-LAST:event_jLabel10MouseClicked
 
     private void jLabel9MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel9MouseClicked
@@ -970,6 +1177,9 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             String email = tblUserSetting.getValueAt(selectedRow, 0).toString();
             long value = (long) jSpinner1.getValue();
             userBLL.UpdateFileSizeUpload(email, value);
+            
+            // bắn message qua cho client để update
+            handleUpdateDataClientThread(email, "update_file_size_upload", String.valueOf(value));
             Message("Cập nhật thành công.!!!");
         }
     }//GEN-LAST:event_btnUpdateCapacityUploadActionPerformed
@@ -982,6 +1192,9 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             String email = tblUserSetting.getValueAt(selectedRow, 0).toString();
             long value = (long) jSpinner2.getValue();
             userBLL.UpdateFileSizeDownload(email, value);
+            
+            // bắn message qua cho client để update
+            handleUpdateDataClientThread(email, "update_file_size_download", String.valueOf(value));
             Message("Cập nhật thành công.!!!");
         }
     }//GEN-LAST:event_jButton6ActionPerformed
@@ -1058,12 +1271,95 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         }
     }//GEN-LAST:event_btnUserSettingAllowUpload2ActionPerformed
 
+    private void tblAllUserOfUserPermissionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblAllUserOfUserPermissionMouseClicked
+        int selectedRow = tblAllUserOfUserPermission.getSelectedRow();
+
+        String email = tblAllUserOfUserPermission.getValueAt(selectedRow, 0).toString();
+
+        FolderUserItem folderUserItem = new FolderBLL().GetListFolderChildUser(email);
+
+        tblFolderOwnOfUserModel.setRowCount(0);
+        if (folderUserItem != null) {
+            folderChildOfUser = folderUserItem.getFolderChild();
+            folderChildOfUser.forEach((folder) -> {
+                tblFolderOwnOfUserModel.addRow(new Object[]{
+                    folder.getFolderId(), folder.getFolderName(), email,
+                    folder.getFolderUserPermission().trim().equals("unlock") ? "Cho phép" : "Vô hiệu hóa"
+                });
+            });
+        }
+    }//GEN-LAST:event_tblAllUserOfUserPermissionMouseClicked
+
+    private void btnUserSettingLockUpload3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUserSettingLockUpload3ActionPerformed
+
+        int selectedRow = tblFolderOwnOfUser.getSelectedRow();
+        if (selectedRow == -1) {
+            Message("Vui lòng chọn thư mục mà bạn muốn\nvô hiệu hóa quyền user của thư mục.!!!");
+        } else {
+            String folderId = tblFolderOwnOfUser.getValueAt(selectedRow, 0).toString();
+            String folderName = tblFolderOwnOfUser.getValueAt(selectedRow, 1).toString();
+            String email = tblFolderOwnOfUser.getValueAt(selectedRow, 2).toString();
+
+            // tiến hành update giá trị FolderUserPermission = 'lock' cho folder con của user:
+            // + update trên Table
+            tblFolderOwnOfUserModel.setValueAt("Vô hiệu hóa", selectedRow, 3);
+            // + update trên database
+            new FolderBLL().UpdateFolderUserPermission(folderId, "lock");
+
+            // dispatch message qua cho client -> update lại FolderUserPermission = 'unlock' folder con của client
+            handleUpdateDataClientThread(email, "update_folder_child_user_permission",
+                    folderId.trim() + ";lock;Quyền truy cập thư mục " + folderName.trim() + " của bạn đã bị vô hiệu hóa");
+            Message("Vô hiệu hóa quyền user thành công.!!!");
+        }
+
+    }//GEN-LAST:event_btnUserSettingLockUpload3ActionPerformed
+
+    private void btnUserSettingAllowUpload3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUserSettingAllowUpload3ActionPerformed
+        int selectedRow = tblFolderOwnOfUser.getSelectedRow();
+        if (selectedRow == -1) {
+            Message("Vui lòng chọn thư mục mà bạn muốn\nkích hoạt quyền user của thư mục.!!!");
+        } else {
+            String folderId = tblFolderOwnOfUser.getValueAt(selectedRow, 0).toString();
+            String folderName = tblFolderOwnOfUser.getValueAt(selectedRow, 1).toString();
+            String email = tblFolderOwnOfUser.getValueAt(selectedRow, 2).toString();
+
+            // tiến hành update giá trị FolderUserPermission = 'unlock' cho folder con của user:
+            // + update trên Table
+            tblFolderOwnOfUserModel.setValueAt("Cho phép", selectedRow, 3);
+            // + update trên database
+            new FolderBLL().UpdateFolderUserPermission(folderId, "unlock");
+
+            // dispatch message qua cho client -> update lại FolderUserPermission = 'unlock' folder con của client
+            handleUpdateDataClientThread(email, "update_folder_child_user_permission",
+                    folderId.trim() + ";unlock;Giờ đây bạn đã có thể toàn quyền truy cập vào thư mục " + folderName.trim());
+            Message("Kích hoạt quyền user thành công.!!!");
+        }
+    }//GEN-LAST:event_btnUserSettingAllowUpload3ActionPerformed
+
+    private void btnUpdateCapacityUpload1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateCapacityUpload1ActionPerformed
+        int selectedRow = tblUserSetting.getSelectedRow();
+        if (selectedRow == -1) {
+            Message("Vui lòng chọn user cần cấu hình duong lượng lưu trữ.!!!");
+        } else {
+            String email = tblUserSetting.getValueAt(selectedRow, 0).toString();
+            long value = (long) jSpinner3.getValue();
+            Folders folder = new FolderBLL().getFolderIdByEmail(email);
+            if (folder != null) {
+                new FolderBLL().UpdateFolderSize(folder, value);
+                
+                // bắn socket message qua client
+                handleUpdateDataClientThread(email, "update_folder_size_user", String.valueOf(value));
+                Message("Cập nhật thành công.!!!");
+            }
+        }
+    }//GEN-LAST:event_btnUpdateCapacityUpload1ActionPerformed
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Gửi data update qua cho user đc chỉ định email trước">
     private void handleUpdateDataClientThread(String email, String message, Object object) {
         if (Server.getMembersOnline() != null) {     // kiểm tra khác null
             for (MembersOnline member : Server.getMembersOnline()) {
-                if (member.getUsers().getEmail().trim().equals(email)) {
+                if (member.getUsers().getEmail().trim().equals(email.trim())) {
                     member.getListenThread().response(message, object);
                     break;
                 }
@@ -1076,7 +1372,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
     // <editor-fold defaultstate="collapsed" desc="Gửi data update qua cho client so sánh theo port">
     private void handleUpdateDataClientThreadWithPort(String port, String message, Object object) {
         for (ListenThread client : listenThread) {
-            if (String.valueOf(client.getSocket().getPort()).equals(port)) {
+            if (String.valueOf(client.getSocket().getPort()).equals(port.trim())) {
                 client.response(message, object);
                 break;
             }
@@ -1117,14 +1413,17 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel background;
     private javax.swing.JButton btnUpdateCapacityUpload;
+    private javax.swing.JButton btnUpdateCapacityUpload1;
     private javax.swing.JButton btnUserSettingAllowDownload;
     private javax.swing.JButton btnUserSettingAllowUpload;
     private javax.swing.JButton btnUserSettingAllowUpload1;
     private javax.swing.JButton btnUserSettingAllowUpload2;
+    private javax.swing.JButton btnUserSettingAllowUpload3;
     private javax.swing.JButton btnUserSettingLockDownload;
     private javax.swing.JButton btnUserSettingLockUpload;
     private javax.swing.JButton btnUserSettingLockUpload1;
     private javax.swing.JButton btnUserSettingLockUpload2;
+    private javax.swing.JButton btnUserSettingLockUpload3;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton6;
     private javax.swing.JLabel jLabel1;
@@ -1142,6 +1441,13 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
+    private javax.swing.JLabel jLabel26;
+    private javax.swing.JLabel jLabel27;
+    private javax.swing.JLabel jLabel28;
+    private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1154,9 +1460,14 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JScrollPane jScrollPane6;
+    private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSpinner jSpinner1;
     private javax.swing.JSpinner jSpinner2;
+    private javax.swing.JSpinner jSpinner3;
     private javax.swing.JPanel pnlAnonymousSettings;
     private javax.swing.JPanel pnlMain;
     private javax.swing.JPanel pnlSection;
@@ -1164,8 +1475,10 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
     private javax.swing.JPanel pnlUserSettings;
     private javax.swing.JPanel pnlViewUserOnline;
     private javax.swing.JTable tblAllUserAnonymousSettings;
+    private javax.swing.JTable tblAllUserOfUserPermission;
     private javax.swing.JTable tblAllUserView;
     private javax.swing.JTable tblClientConnectAnonymousSettings;
+    private javax.swing.JTable tblFolderOwnOfUser;
     private javax.swing.JTable tblUserOnlineView;
     private javax.swing.JTable tblUserSetting;
     // End of variables declaration//GEN-END:variables

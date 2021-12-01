@@ -14,7 +14,7 @@ import java.io.Serializable;
 public class Folders implements Serializable {
 
     private String FolderId, FolderName, FolderPath,
-            Email, Size, RemainingSize, CreateAt, FolderParentId;
+            Email, Size, RemainingSize, CreateAt, FolderParentId, FolderUserPermission;
 
     public Folders(String FolderId, String FolderName, String FolderPath,
             String Email, String Size, String RemainingSize, String CreateAt) {
@@ -32,6 +32,14 @@ public class Folders implements Serializable {
     }
 
     public Folders() {
+    }
+
+    public String getFolderUserPermission() {
+        return FolderUserPermission;
+    }
+
+    public void setFolderUserPermission(String FolderUserPermission) {
+        this.FolderUserPermission = FolderUserPermission;
     }
 
     public String getFolderParentId() {
