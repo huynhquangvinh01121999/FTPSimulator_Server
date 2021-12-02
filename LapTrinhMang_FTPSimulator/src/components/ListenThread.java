@@ -390,7 +390,13 @@ public class ListenThread extends Thread {
             while (!isDisconnect) {
 
                 try {
-                    request = (ObjectRequest) objInputStream.readObject();
+                    
+                    // đồng bộ read object
+                    synchronized (objInputStream) {
+                        request = (ObjectRequest) objInputStream.readObject();
+                    }
+                    
+//                    request = (ObjectRequest) objInputStream.readObject();
                     String message = request.getMessage();
                     switch (message.toUpperCase()) {
                         case "DISCONNECT": {
