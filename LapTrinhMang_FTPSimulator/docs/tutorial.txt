@@ -5,6 +5,5 @@ trên chính máy bạn. Thông tin tài khoản:
 	+ Mật khẩu : vinh01121999
 
 Để truy cập được database:
-. B1: Chạy lần lượt các file script schema.sql, data.sql, update_script.sql trong folder database_script
-. B2: Tại server, truy cập vào thư mục dal.Common -> ConfigAuthen sau đó đổi username và password theo sqlserver của máy bạn
+- Truy cập vào thư mục dal.Common -> ConfigAuthen sau đó đổi username và password theo sqlserver của máy bạn
 * Bạn có thể thử test connect tại dal.Common -> GetConnection

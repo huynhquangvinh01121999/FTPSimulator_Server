@@ -85,6 +85,30 @@ public class FolderServices extends BaseServices implements IServices<Folders> {
     public boolean Remove(String value) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    public boolean checkAnonymousExist(String anonymous){
+        try {
+            String sql = "select * from folders where FolderId = ?";
+            dbContext = GetConnection.getInstance().getConn();
+            ps = dbContext.prepareStatement(sql);
+            ps.setString(1, anonymous);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+
+        } catch (SQLException ex) {
+            System.err.println("Lỗi khi đọc dữ liệu - " + ex);
+        } finally {
+            try {
+                rs.close();
+                ps.close();
+            } catch (SQLException ex) {
+                System.err.println("đóng connect ko thành công - " + ex);
+            }
+        }
+        return false;
+    }
 
     public Folders FindFolderParentByEmail(String email) {
         Folders folder;

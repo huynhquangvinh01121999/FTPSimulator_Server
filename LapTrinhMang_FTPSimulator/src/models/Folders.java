@@ -17,7 +17,7 @@ public class Folders implements Serializable {
             Email, Size, RemainingSize, CreateAt, FolderParentId, FolderUserPermission;
 
     public Folders(String FolderId, String FolderName, String FolderPath,
-            String Email, String Size, String RemainingSize, String CreateAt) {
+                   String Email, String Size, String RemainingSize, String CreateAt) {
         this.FolderId = FolderId;
         this.FolderName = FolderName;
         this.FolderPath = FolderPath;
@@ -27,8 +27,9 @@ public class Folders implements Serializable {
         this.CreateAt = CreateAt;
     }
 
-    public Folders(String FolderId) {
+    public Folders(String FolderId, String FolderUserPermission) {
         this.FolderId = FolderId;
+        this.FolderUserPermission = FolderUserPermission;
     }
 
     public Folders() {

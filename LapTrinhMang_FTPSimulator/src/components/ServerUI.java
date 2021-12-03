@@ -45,6 +45,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         loadDataClientConnectionAnonymousSettingsModel();
         loadDataUserPermissionModel();
 
+        userBLL.genarateAnonymous();
     }
 
     @SuppressWarnings("unchecked")
@@ -185,7 +186,6 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         jButton6 = new javax.swing.JButton();
         jLabel18 = new javax.swing.JLabel();
         jLabel19 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
         jLabel27 = new javax.swing.JLabel();
         jSpinner3 = new javax.swing.JSpinner();
         jLabel28 = new javax.swing.JLabel();
@@ -455,13 +455,6 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         jLabel19.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
         jLabel19.setText("(byte)");
 
-        jButton1.setText("test");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-
         jLabel27.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel27.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel27.setText("Max storage capacity:");
@@ -497,11 +490,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             .addGroup(pnlUserSettingsLayout.createSequentialGroup()
                 .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(pnlUserSettingsLayout.createSequentialGroup()
-                        .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(pnlUserSettingsLayout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(jButton1)))
+                        .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(60, 60, 60)
                         .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(btnUserSettingLockDownload, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -553,8 +542,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                 .addGap(18, 18, 18)
                 .addGroup(pnlUserSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnUserSettingLockDownload, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnUserSettingAllowDownload, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
+                    .addComponent(btnUserSettingAllowDownload, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1165,10 +1153,6 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         }
     }//GEN-LAST:event_btnUserSettingAllowDownloadActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        handleUpdateDataClientThread("huynhquangvinh1999@gmail.com", "test_from_serverui", "xin chào");
-    }//GEN-LAST:event_jButton1ActionPerformed
-
     private void btnUpdateCapacityUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateCapacityUploadActionPerformed
         int selectedRow = tblUserSetting.getSelectedRow();
         if (selectedRow == -1) {
@@ -1424,7 +1408,6 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
     private javax.swing.JButton btnUserSettingLockUpload1;
     private javax.swing.JButton btnUserSettingLockUpload2;
     private javax.swing.JButton btnUserSettingLockUpload3;
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton6;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

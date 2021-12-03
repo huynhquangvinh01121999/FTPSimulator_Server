@@ -261,11 +261,6 @@ public class ListenThread extends Thread {
             Logger.getLogger(ListenThread.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
-//    private void accept_disconnect() {
-//        isDisconnect = true;
-//        sendMessage("ACCCEP_DISCONNECT");
-//    }
     private void accept_disconnect() {
         try {
             isDisconnect = true;
@@ -331,15 +326,6 @@ public class ListenThread extends Thread {
         }
 
     }
-
-//    public Users getObjectUser() throws IOException, ClassNotFoundException {
-//        Users user = (Users) objInputStream.readObject();
-//        return user;
-//    }
-//    public Folders getObjectFolder() throws IOException, ClassNotFoundException {
-//        Folders folder = (Folders) objInputStream.readObject();
-//        return folder;
-//    }
     public void response(String data) {
         try {
             out.write(data);
@@ -396,7 +382,6 @@ public class ListenThread extends Thread {
                         request = (ObjectRequest) objInputStream.readObject();
                     }
                     
-//                    request = (ObjectRequest) objInputStream.readObject();
                     String message = request.getMessage();
                     switch (message.toUpperCase()) {
                         case "DISCONNECT": {
@@ -428,16 +413,6 @@ public class ListenThread extends Thread {
                             FileEvent fileEvent = (FileEvent) request.getFileUpload();
                             new FileBLL().insertNewFile(filesInfo);
                             saveFile(fileEvent);
-
-//                try {
-//                    new FileBLL().insertNewFile(listenThread.FileSaver());
-//                new FileBLL().insertNewFile((Files) request.getObject());
-//                listenThread.saveFile();
-//                } catch (IOException ex) {
-//                    Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
-//                } catch (ClassNotFoundException ex) {
-//                    Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
-//                }
                         }
                         break;
 
@@ -464,12 +439,6 @@ public class ListenThread extends Thread {
                             Users user = (Users) request.getObject();
                             HandleResult result = HandleVerify.verifyRegisterUser(user);
                             response("response_verify_register", result);
-
-                            // version_1
-//                Users user = listenThread.getObjectUser();
-//                HandleResult result = HandleVerify.verifyRegisterUser(user);
-//                listenThread.sendMessage("response_verify_register");
-//                listenThread.responseHandleResult(result);
                             break;
                         }
                         case "REGISTER": {
@@ -478,12 +447,6 @@ public class ListenThread extends Thread {
                             Users user = (Users) request.getObject();
                             HandleResult result = new UserBLL().registerUser(user);
                             response("response_register", result);
-
-                            // version_1
-//                Users user = listenThread.getObjectUser();
-//                HandleResult result = new UserBLL().registerUser(user);
-//                listenThread.sendMessage("response_register");
-//                listenThread.responseHandleResult(result);
                             break;
                         }
 
@@ -513,22 +476,6 @@ public class ListenThread extends Thread {
                                     registerMemberOnline(result.getUser());
                                 }
                             }
-
-                            // version_1
-//                try {
-//                    Users user = listenThread.getObjectUser();
-//                    HandleResult result = new UserBLL().authenticate(user);
-//                    listenThread.sendMessage("response_authenticate");
-//                    listenThread.responseHandleResult(result);
-//                    Thread.sleep(3000);
-//                    if (result.isSuccessed()) {
-//                        listenThread.responseHandleResult(new UserBLL().getAuthenData(result.getFolder().getFolderId()));
-//                    }
-//                } catch (IOException | ClassNotFoundException ex) {
-//                    Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
-//                } catch (InterruptedException ex) {
-//                    Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
-//                }
                             break;
                         }
 
@@ -551,14 +498,6 @@ public class ListenThread extends Thread {
                             System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
                             Folders folder = (Folders) request.getObject();
                             new FolderBLL().generateFolderChild(folder);
-
-                            // version_1
-//                Folders folder = listenThread.getObjectFolder();
-//                new FolderBLL().generateFolderChild(folder);
-//                System.out.println("folderParentId: " + folder.getFolderParentId());
-//                System.out.println("emailUser: " + folder.getEmail());
-//                System.out.println("rootPath: " + folder.getFolderPath());
-//                System.out.println("folderChildName: " + folder.getFolderName());
                             break;
                         }
 
@@ -574,7 +513,8 @@ public class ListenThread extends Thread {
                         case "SHARE_FOLDER": {
                             System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
                             DataShare dataShare = (DataShare) request.getObject();
-                            new SharesBLL().shareFolder(dataShare);
+//                            new SharesBLL().shareFolder(dataShare);
+                            new SharesBLL().shareFolder_Dequy(dataShare);
                             String notifiShareFolder = "Bạn vừa được chia sẻ một thư mục từ email " + dataShare.getFromEmail();
                             notificationShared(dataShare.getListUserShare(), notifiShareFolder);
                             break;
