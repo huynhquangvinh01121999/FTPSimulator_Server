@@ -986,7 +986,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
     }//GEN-LAST:event_jLabel9MouseClicked
 
     private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
-        tranferLayout("pnlViewUserOnline");
+//        tranferLayout("pnlViewUserOnline");
     }//GEN-LAST:event_jLabel1MouseClicked
 
     private void btnUserSettingLockUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUserSettingLockUploadActionPerformed
