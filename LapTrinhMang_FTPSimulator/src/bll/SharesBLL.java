@@ -82,23 +82,11 @@ public class SharesBLL {
         }
     }
 
-    private List<Folders> getFolderGrandChildren(List<Folders> listFolderChild) {
-        List<Folders> folderGrandChildren = new ArrayList<>();
-        for (Folders folder : listFolderChild) {
-            List<Folders> listChild = new FolderServices().FindListChildFolder(folder.getFolderId());
-            if (!listChild.isEmpty()) {
-                folderGrandChildren.addAll(listChild);
-                folderGrandChildren.addAll(getFolderGrandChildren(listChild));
-            }
-        }
-        return folderGrandChildren;
-    }
-
     private List<Folders> getAllFolderChild(String folderId) {
 
         // lấy ra danh sách các folder con cháu bên trong của đc share
         List<Folders> listChild = new FolderServices().FindListChildFolder(folderId);
-        List<Folders> folderGrandChildren = getFolderGrandChildren(listChild);
+        List<Folders> folderGrandChildren = new FolderBLL().getFolderGrandChildren(listChild);
         if (!folderGrandChildren.isEmpty()) {
             listChild.addAll(folderGrandChildren);
         }

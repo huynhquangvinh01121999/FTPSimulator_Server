@@ -56,4 +56,8 @@ chức năng lock/unlock user download/upload:
 - Khi client đang truy cập app vs quyền anonymous -> server lock -> client văng	: ĐÃ FIX
 - Cập nhật lại database dung lượng file upload/download khi create user	: ĐÃ FIX
 
+- Khi Server bỏ gán quyền user trên folder của 1 user thì chưa đồng bộ.	: OK
+- Khi lock user folder permission thì các folder con của folder đc lock cũng sẽ bị lock : OK
+- Khi folder của user đc share thì user upload vào phải đc share cho ng đc share	: OK
+
 

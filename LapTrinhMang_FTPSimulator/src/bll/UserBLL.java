@@ -120,26 +120,13 @@ public class UserBLL {
         }
         return verifyResult;
     }
-
-    // // đệ quy để lấy ra các folder cháu chắc bậc 2,3,... của folder con bậc 1
-    private List<Folders> getFolderGrandChildren(List<Folders> listFolderChild) {
-        List<Folders> folderGrandChildren = new ArrayList<>();
-        for (Folders folder : listFolderChild) {
-            List<Folders> listChild = folderServices.FindListChildFolder(folder.getFolderId());
-            if (!listChild.isEmpty()) {
-                folderGrandChildren.addAll(listChild);
-                folderGrandChildren.addAll(getFolderGrandChildren(listChild));
-            }
-        }
-        return folderGrandChildren;
-    }
     
     public HandleResult getAuthenData(String folderParentId, String email) {
         // lấy ra danh sách các folder con bậc 1
         List<Folders> listFolderChildInfo = new ArrayList<>();
         listFolderChildInfo = folderServices.FindListChildFolder(folderParentId);
         
-        List<Folders> folderGrandChildren = getFolderGrandChildren(listFolderChildInfo);
+        List<Folders> folderGrandChildren = new FolderBLL().getFolderGrandChildren(listFolderChildInfo);
         if (!folderGrandChildren.isEmpty()) {
             listFolderChildInfo.addAll(folderGrandChildren);
         }

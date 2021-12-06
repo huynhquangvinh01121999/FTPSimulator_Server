@@ -9,6 +9,7 @@ import bll.helpers.DateHelper;
 import bll.helpers.FileExtensions;
 import bll.helpers.ThreadRandoms;
 import dal.Services.FolderServices;
+import java.util.ArrayList;
 import java.util.List;
 import models.FolderUserItem;
 import models.Folders;
@@ -32,7 +33,23 @@ public class FolderBLL {
     }
 
     public boolean UpdateFolderUserPermission(String folderId, String permission) {
+        // update quyền user cho folder đc chọn
         return new FolderServices().UpdateFolderUserPermission(folderId, permission);
+        
+        // update quyền user cho các folder con của folder đc chọn
+    }
+
+    // đệ quy để lấy ra các folder cháu chắc bậc 2,3,... của folder con bậc 1
+    public List<Folders> getFolderGrandChildren(List<Folders> listFolderChild) {
+        List<Folders> folderGrandChildren = new ArrayList<>();
+        for (Folders folder : listFolderChild) {
+            List<Folders> listChild = new FolderServices().FindListChildFolder(folder.getFolderId());
+            if (!listChild.isEmpty()) {
+                folderGrandChildren.addAll(listChild);
+                folderGrandChildren.addAll(getFolderGrandChildren(listChild));
+            }
+        }
+        return folderGrandChildren;
     }
 
     public FolderUserItem GetListFolderChildUser(String email) {
@@ -41,6 +58,10 @@ public class FolderBLL {
         if (folderInfo != null) {
             List<Folders> listFolderChild = folderServices.FindListChildFolder(folderInfo.getFolderId());
             if (!listFolderChild.isEmpty()) {
+                List<Folders> folderGrandChildren = getFolderGrandChildren(listFolderChild);
+                if (!folderGrandChildren.isEmpty()) {
+                    listFolderChild.addAll(folderGrandChildren);
+                }
                 return new FolderUserItem(email, listFolderChild);
             }
         }

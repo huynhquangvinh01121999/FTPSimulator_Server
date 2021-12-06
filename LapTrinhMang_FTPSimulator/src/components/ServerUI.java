@@ -2,6 +2,7 @@ package components;
 
 import bll.FolderBLL;
 import bll.UserBLL;
+import dal.Services.FolderServices;
 import java.awt.CardLayout;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import javax.swing.table.DefaultTableModel;
 import models.FolderUserItem;
 import models.Folders;
 import models.MembersOnline;
+import models.UpdateResultFolderUserPermission;
 
 /**
  *
@@ -1161,7 +1163,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             String email = tblUserSetting.getValueAt(selectedRow, 0).toString();
             long value = (long) jSpinner1.getValue();
             userBLL.UpdateFileSizeUpload(email, value);
-            
+
             // bắn message qua cho client để update
             handleUpdateDataClientThread(email, "update_file_size_upload", String.valueOf(value));
             Message("Cập nhật thành công.!!!");
@@ -1176,7 +1178,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             String email = tblUserSetting.getValueAt(selectedRow, 0).toString();
             long value = (long) jSpinner2.getValue();
             userBLL.UpdateFileSizeDownload(email, value);
-            
+
             // bắn message qua cho client để update
             handleUpdateDataClientThread(email, "update_file_size_download", String.valueOf(value));
             Message("Cập nhật thành công.!!!");
@@ -1280,6 +1282,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         if (selectedRow == -1) {
             Message("Vui lòng chọn thư mục mà bạn muốn\nvô hiệu hóa quyền user của thư mục.!!!");
         } else {
+            FolderBLL folderBLL = new FolderBLL();
             String folderId = tblFolderOwnOfUser.getValueAt(selectedRow, 0).toString();
             String folderName = tblFolderOwnOfUser.getValueAt(selectedRow, 1).toString();
             String email = tblFolderOwnOfUser.getValueAt(selectedRow, 2).toString();
@@ -1287,12 +1290,26 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             // tiến hành update giá trị FolderUserPermission = 'lock' cho folder con của user:
             // + update trên Table
             tblFolderOwnOfUserModel.setValueAt("Vô hiệu hóa", selectedRow, 3);
-            // + update trên database
-            new FolderBLL().UpdateFolderUserPermission(folderId, "lock");
+
+            // + lấy ra các folder con bên trong folder đc chọn update
+            List<Folders> listFolderChild = new FolderServices().FindListChildFolder(folderId);
+            if (!listFolderChild.isEmpty()) {
+                List<Folders> folderGrandChildren = folderBLL.getFolderGrandChildren(listFolderChild);
+                if (!folderGrandChildren.isEmpty()) {
+                    listFolderChild.addAll(folderGrandChildren);
+                }
+                // + update folder đc chọn trên database
+                folderBLL.UpdateFolderUserPermission(folderId, "lock");
+                for (Folders folder : listFolderChild) {
+                    // update các folder con bên trong
+                    folderBLL.UpdateFolderUserPermission(folder.getFolderId(), "lock");
+                }
+            }
+            UpdateResultFolderUserPermission result
+                    = new UpdateResultFolderUserPermission(folderId.trim(), listFolderChild, "lock", "Quyền truy cập thư mục " + folderName.trim() + " của bạn đã bị vô hiệu hóa");
 
             // dispatch message qua cho client -> update lại FolderUserPermission = 'unlock' folder con của client
-            handleUpdateDataClientThread(email, "update_folder_child_user_permission",
-                    folderId.trim() + ";lock;Quyền truy cập thư mục " + folderName.trim() + " của bạn đã bị vô hiệu hóa");
+            handleUpdateDataClientThread(email, "update_folder_child_user_permission", result);
             Message("Vô hiệu hóa quyền user thành công.!!!");
         }
 
@@ -1303,6 +1320,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         if (selectedRow == -1) {
             Message("Vui lòng chọn thư mục mà bạn muốn\nkích hoạt quyền user của thư mục.!!!");
         } else {
+            FolderBLL folderBLL = new FolderBLL();
             String folderId = tblFolderOwnOfUser.getValueAt(selectedRow, 0).toString();
             String folderName = tblFolderOwnOfUser.getValueAt(selectedRow, 1).toString();
             String email = tblFolderOwnOfUser.getValueAt(selectedRow, 2).toString();
@@ -1310,12 +1328,27 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             // tiến hành update giá trị FolderUserPermission = 'unlock' cho folder con của user:
             // + update trên Table
             tblFolderOwnOfUserModel.setValueAt("Cho phép", selectedRow, 3);
-            // + update trên database
-            new FolderBLL().UpdateFolderUserPermission(folderId, "unlock");
+
+            // + lấy ra các folder con bên trong folder đc chọn update
+            List<Folders> listFolderChild = new FolderServices().FindListChildFolder(folderId);
+            if (!listFolderChild.isEmpty()) {
+                List<Folders> folderGrandChildren = folderBLL.getFolderGrandChildren(listFolderChild);
+                if (!folderGrandChildren.isEmpty()) {
+                    listFolderChild.addAll(folderGrandChildren);
+                }
+                // + update folder đc chọn trên database
+                folderBLL.UpdateFolderUserPermission(folderId, "unlock");
+                for (Folders folder : listFolderChild) {
+                    // update các folder con bên trong
+                    folderBLL.UpdateFolderUserPermission(folder.getFolderId(), "unlock");
+                }
+            }
+
+            UpdateResultFolderUserPermission result
+                    = new UpdateResultFolderUserPermission(folderId.trim(), listFolderChild, "unlock", "Giờ đây bạn đã có thể toàn quyền truy cập vào thư mục " + folderName.trim());
 
             // dispatch message qua cho client -> update lại FolderUserPermission = 'unlock' folder con của client
-            handleUpdateDataClientThread(email, "update_folder_child_user_permission",
-                    folderId.trim() + ";unlock;Giờ đây bạn đã có thể toàn quyền truy cập vào thư mục " + folderName.trim());
+            handleUpdateDataClientThread(email, "update_folder_child_user_permission", result);
             Message("Kích hoạt quyền user thành công.!!!");
         }
     }//GEN-LAST:event_btnUserSettingAllowUpload3ActionPerformed
@@ -1330,7 +1363,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             Folders folder = new FolderBLL().getFolderIdByEmail(email);
             if (folder != null) {
                 new FolderBLL().UpdateFolderSize(folder, value);
-                
+
                 // bắn socket message qua client
                 handleUpdateDataClientThread(email, "update_folder_size_user", String.valueOf(value));
                 Message("Cập nhật thành công.!!!");

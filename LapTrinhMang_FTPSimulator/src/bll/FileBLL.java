@@ -4,9 +4,11 @@ import bll.helpers.DateHelper;
 import dal.Services.FileServices;
 import dal.Services.FileShareServices;
 import dal.Services.FolderServices;
+import dal.Services.FolderShareServices;
 import java.util.List;
 import models.FileShares;
 import models.Files;
+import models.FolderShares;
 
 public class FileBLL {
 
@@ -26,6 +28,9 @@ public class FileBLL {
              - CT tính: lấy dung lượng còn của folder Trừ đi dung lượng file mới gửi lên
              - tiến hành update dung lượng cho folder của user
              - tiến hành thêm mới thông tin file vào database
+    
+    * kiểm tra folder mà user upload file lên có dc chia sẻ cho ai chưa
+    ** nếu có -> chia sẻ file đó vs những ng đc chia sẻ trong folder đó, quyền sẽ lấy theo quyền truy cập folder đc gán sẵn của ng đó
      */
     public boolean insertNewFile(Files file) {
         String remainingSizeFolder = new FolderServices().GetRemainingSizeFolder(file.getFolderId());
@@ -51,6 +56,15 @@ public class FileBLL {
                     UpdateRemainingSize(String.valueOf(remainingSizeFolderConvert), file.getFolderId());
         } catch (Exception e) {
             System.err.println("Xảy ra lỗi khi update dung lượng còn lại của folder" + e);
+        }
+
+        // kiểm tra folder mà user upload file lên có dc chia sẻ cho ai chưa
+        List<FolderShares> folderShareses = new FolderShareServices().getListFolderShared(file.getFolderId());
+        if (!folderShareses.isEmpty()) {
+            for (FolderShares folderShares : folderShareses) {
+                fileShareServices.Create(new FileShares(file.getFileId(),
+                        folderShares.getFromEmail(), folderShares.getToEmail(), folderShares.getPermissionId(), DateHelper.Now()));
+            }
         }
         return fileService.Create(file);
     }
