@@ -146,9 +146,14 @@ public class UserBLL {
     }
     
     public HandleResult getAuthenDataLockAnonymous(String folderParentId, String email) {
-        // lấy ra danh sách các folder con
+        // lấy ra danh sách các folder con bậc 1
         List<Folders> listFolderChildInfo = new ArrayList<>();
         listFolderChildInfo = folderServices.FindListChildFolder(folderParentId);
+        
+        List<Folders> folderGrandChildren = new FolderBLL().getFolderGrandChildren(listFolderChildInfo);
+        if (!folderGrandChildren.isEmpty()) {
+            listFolderChildInfo.addAll(folderGrandChildren);
+        }
 
         // lấy ra toàn bộ tất cả các file của user + anonymous
         String prexEmail = email.split("@")[0];

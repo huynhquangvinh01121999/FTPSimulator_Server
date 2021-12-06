@@ -985,6 +985,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
     private void jLabel9MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel9MouseClicked
         tranferLayout("pnlAnonymousSettings");
         loadDataClientConnectionAnonymousSettingsModel();
+        loadDataUserAnonymousSettingsModel();
     }//GEN-LAST:event_jLabel9MouseClicked
 
     private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
@@ -1163,7 +1164,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             String email = tblUserSetting.getValueAt(selectedRow, 0).toString();
             long value = (long) jSpinner1.getValue();
             userBLL.UpdateFileSizeUpload(email, value);
-
+            loadDataUserSettingModel();
             // bắn message qua cho client để update
             handleUpdateDataClientThread(email, "update_file_size_upload", String.valueOf(value));
             Message("Cập nhật thành công.!!!");
@@ -1178,7 +1179,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             String email = tblUserSetting.getValueAt(selectedRow, 0).toString();
             long value = (long) jSpinner2.getValue();
             userBLL.UpdateFileSizeDownload(email, value);
-
+            loadDataUserSettingModel();
             // bắn message qua cho client để update
             handleUpdateDataClientThread(email, "update_file_size_download", String.valueOf(value));
             Message("Cập nhật thành công.!!!");
@@ -1291,6 +1292,9 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             // + update trên Table
             tblFolderOwnOfUserModel.setValueAt("Vô hiệu hóa", selectedRow, 3);
 
+            // + update folder đc chọn trên database
+            folderBLL.UpdateFolderUserPermission(folderId, "lock");
+
             // + lấy ra các folder con bên trong folder đc chọn update
             List<Folders> listFolderChild = new FolderServices().FindListChildFolder(folderId);
             if (!listFolderChild.isEmpty()) {
@@ -1298,8 +1302,6 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                 if (!folderGrandChildren.isEmpty()) {
                     listFolderChild.addAll(folderGrandChildren);
                 }
-                // + update folder đc chọn trên database
-                folderBLL.UpdateFolderUserPermission(folderId, "lock");
                 for (Folders folder : listFolderChild) {
                     // update các folder con bên trong
                     folderBLL.UpdateFolderUserPermission(folder.getFolderId(), "lock");
@@ -1310,6 +1312,8 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
 
             // dispatch message qua cho client -> update lại FolderUserPermission = 'unlock' folder con của client
             handleUpdateDataClientThread(email, "update_folder_child_user_permission", result);
+            tblFolderOwnOfUserModel.setRowCount(0);
+            loadDataUserPermissionModel();
             Message("Vô hiệu hóa quyền user thành công.!!!");
         }
 
@@ -1328,6 +1332,9 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             // tiến hành update giá trị FolderUserPermission = 'unlock' cho folder con của user:
             // + update trên Table
             tblFolderOwnOfUserModel.setValueAt("Cho phép", selectedRow, 3);
+            
+            // + update folder đc chọn trên database
+            folderBLL.UpdateFolderUserPermission(folderId, "unlock");
 
             // + lấy ra các folder con bên trong folder đc chọn update
             List<Folders> listFolderChild = new FolderServices().FindListChildFolder(folderId);
@@ -1336,8 +1343,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                 if (!folderGrandChildren.isEmpty()) {
                     listFolderChild.addAll(folderGrandChildren);
                 }
-                // + update folder đc chọn trên database
-                folderBLL.UpdateFolderUserPermission(folderId, "unlock");
+
                 for (Folders folder : listFolderChild) {
                     // update các folder con bên trong
                     folderBLL.UpdateFolderUserPermission(folder.getFolderId(), "unlock");
@@ -1349,6 +1355,8 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
 
             // dispatch message qua cho client -> update lại FolderUserPermission = 'unlock' folder con của client
             handleUpdateDataClientThread(email, "update_folder_child_user_permission", result);
+            tblFolderOwnOfUserModel.setRowCount(0);
+            loadDataUserPermissionModel();
             Message("Kích hoạt quyền user thành công.!!!");
         }
     }//GEN-LAST:event_btnUserSettingAllowUpload3ActionPerformed
@@ -1363,7 +1371,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             Folders folder = new FolderBLL().getFolderIdByEmail(email);
             if (folder != null) {
                 new FolderBLL().UpdateFolderSize(folder, value);
-
+                loadDataUserSettingModel();
                 // bắn socket message qua client
                 handleUpdateDataClientThread(email, "update_folder_size_user", String.valueOf(value));
                 Message("Cập nhật thành công.!!!");
