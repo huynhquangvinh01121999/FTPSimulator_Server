@@ -384,13 +384,16 @@ public class ListenThread extends Thread {
                     
                     String message = request.getMessage();
                     switch (message.toUpperCase()) {
+                        case "SIGNOUT":{
+                            // Xóa user đã offline khỏi ds user đang online
+                            removeMemberDisconnect(getMember());
+                            break;
+                        }
+                        
                         case "DISCONNECT": {
                             System.err.println("Client with port " + clientSocket.getPort() + " with disconnect");
                             accept_disconnect();
                             Thread.sleep(3000);
-
-                            // Xóa user đã offline khỏi ds user đang online
-                            removeMemberDisconnect(getMember());
 
                             // Xóa client bị đóng kết nối khỏi ds client đang connect
                             Server.removeClientDisconnect(this);

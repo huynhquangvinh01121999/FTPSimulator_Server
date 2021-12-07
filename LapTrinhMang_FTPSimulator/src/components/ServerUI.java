@@ -1386,7 +1386,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             for (MembersOnline member : Server.getMembersOnline()) {
                 if (member.getUsers().getEmail().trim().equals(email.trim())) {
                     member.getListenThread().response(message, object);
-                    break;
+//                    break;
                 }
             }
         }
