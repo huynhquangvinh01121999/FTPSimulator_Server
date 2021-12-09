@@ -261,6 +261,7 @@ public class ListenThread extends Thread {
             Logger.getLogger(ListenThread.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
     private void accept_disconnect() {
         try {
             isDisconnect = true;
@@ -326,6 +327,7 @@ public class ListenThread extends Thread {
         }
 
     }
+
     public void response(String data) {
         try {
             out.write(data);
@@ -376,27 +378,30 @@ public class ListenThread extends Thread {
             while (!isDisconnect) {
 
                 try {
-                    
+
                     // đồng bộ read object
                     synchronized (objInputStream) {
                         request = (ObjectRequest) objInputStream.readObject();
                     }
-                    
+
                     String message = request.getMessage();
                     switch (message.toUpperCase()) {
-                        case "SIGNOUT":{
+                        case "SIGNOUT": {
                             // Xóa user đã offline khỏi ds user đang online
                             removeMemberDisconnect(getMember());
                             break;
                         }
-                        
+
                         case "DISCONNECT": {
                             System.err.println("Client with port " + clientSocket.getPort() + " with disconnect");
                             accept_disconnect();
                             Thread.sleep(3000);
-                            
-                            // Xóa user đã offline khỏi ds user đang online
-                            removeMemberDisconnect(getMember());
+
+                            try {
+                                // Xóa user đã offline khỏi ds user đang online
+                                removeMemberDisconnect(getMember());
+                            } catch (Exception ex) {
+                            }
 
                             // Xóa client bị đóng kết nối khỏi ds client đang connect
                             Server.removeClientDisconnect(this);
