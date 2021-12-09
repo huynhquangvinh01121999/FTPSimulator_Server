@@ -48,7 +48,21 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         loadDataUserPermissionModel();
 
         userBLL.genarateAnonymous();
+        
+        // set edit table
+        setDefaultEditorTable();
     }
+    
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="set edit table">
+    private void setDefaultEditorTable(){
+        tblUserSetting.setDefaultEditor(Object.class, null);
+        tblAllUserOfUserPermission.setDefaultEditor(Object.class, null);
+        tblFolderOwnOfUser.setDefaultEditor(Object.class, null);
+        tblClientConnectAnonymousSettings.setDefaultEditor(Object.class, null);
+        tblAllUserAnonymousSettings.setDefaultEditor(Object.class, null);
+    }
+    // </editor-fold>
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="RELOAD CLIENT IN TABLE MODEL">
@@ -1010,7 +1024,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         handleUpdateDataClientThread(email, "update_lock_unlock_features", "d;Chức năng upload của bạn đã bị khóa");
                     } catch (Exception ex) {
                         Message("Đã xảy ra lỗi khi lock user upload file.!!!");
-                        System.err.println("Đã xảy ra lỗi khi lock user upload file - " + ex);
+//                        System.err.println("Đã xảy ra lỗi khi lock user upload file - " + ex);
                     }
                     break;
                 }
@@ -1022,7 +1036,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         handleUpdateDataClientThread(email, "update_lock_unlock_features", "r;Chức năng upload của bạn đã bị khóa");
                     } catch (Exception ex) {
                         Message("Đã xảy ra lỗi khi lock user upload file.!!!");
-                        System.err.println("Đã xảy ra lỗi khi lock user upload file - " + ex);
+//                        System.err.println("Đã xảy ra lỗi khi lock user upload file - " + ex);
                     }
                     break;
                 }
@@ -1051,7 +1065,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         handleUpdateDataClientThread(email, "update_lock_unlock_features", "all;Giờ đây bạn đã có thể sử dụng chức năng upload");
                     } catch (Exception ex) {
                         Message("Đã xảy ra lỗi khi unlock user upload file.!!!");
-                        System.err.println("Đã xảy ra lỗi khi unlock user upload file - " + ex);
+//                        System.err.println("Đã xảy ra lỗi khi unlock user upload file - " + ex);
                     }
                     break;
                 }
@@ -1063,7 +1077,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         handleUpdateDataClientThread(email, "update_lock_unlock_features", "u;Giờ đây bạn đã có thể sử dụng chức năng upload");
                     } catch (Exception ex) {
                         Message("Đã xảy ra lỗi khi unlock user upload file.!!!");
-                        System.err.println("Đã xảy ra lỗi khi unlock user upload file - " + ex);
+//                        System.err.println("Đã xảy ra lỗi khi unlock user upload file - " + ex);
                     }
                     break;
                 }
@@ -1092,7 +1106,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         handleUpdateDataClientThread(email, "update_lock_unlock_features", "u;Chức năng download của bạn đã bị khóa");
                     } catch (Exception ex) {
                         Message("Đã xảy ra lỗi khi lock user download file.!!!");
-                        System.err.println("Đã xảy ra lỗi khi lock user download file - " + ex);
+//                        System.err.println("Đã xảy ra lỗi khi lock user download file - " + ex);
                     }
                     break;
                 }
@@ -1104,7 +1118,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         handleUpdateDataClientThread(email, "update_lock_unlock_features", "r;Chức năng download của bạn đã bị khóa");
                     } catch (Exception ex) {
                         Message("Đã xảy ra lỗi khi lock user download file.!!!");
-                        System.err.println("Đã xảy ra lỗi khi lock user download file - " + ex);
+//                        System.err.println("Đã xảy ra lỗi khi lock user download file - " + ex);
                     }
                     break;
                 }
@@ -1133,7 +1147,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         handleUpdateDataClientThread(email, "update_lock_unlock_features", "all;Giờ đây bạn đã có thể sử dụng chức năng download");
                     } catch (Exception ex) {
                         Message("Đã xảy ra lỗi khi unlock user download file.!!!");
-                        System.err.println("Đã xảy ra lỗi khi unlock user download file - " + ex);
+//                        System.err.println("Đã xảy ra lỗi khi unlock user download file - " + ex);
                     }
                     break;
                 }
@@ -1145,7 +1159,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
                         handleUpdateDataClientThread(email, "update_lock_unlock_features", "d;Giờ đây bạn đã có thể sử dụng chức năng download");
                     } catch (Exception ex) {
                         Message("Đã xảy ra lỗi khi unlock user download file.!!!");
-                        System.err.println("Đã xảy ra lỗi khi unlock user download file - " + ex);
+//                        System.err.println("Đã xảy ra lỗi khi unlock user download file - " + ex);
                     }
                     break;
                 }

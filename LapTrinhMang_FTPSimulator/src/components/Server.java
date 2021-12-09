@@ -1,6 +1,5 @@
 package components;
 
-import bll.UserBLL;
 import java.io.IOException;
 import java.util.UUID;
 import java.net.ServerSocket;
@@ -107,6 +106,7 @@ public class Server {
 //------------------- DANH SÁCH USER THÀNH VIÊN ONLINE -------------------
     public static void registerMemberOnline(MembersOnline member) {
         list_members.add(member);
+        System.out.println("Total user online: " + list_members.size());
     }
 
     public static void removeMemberDisconnect(MembersOnline member) {
