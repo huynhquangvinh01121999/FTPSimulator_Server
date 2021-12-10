@@ -386,12 +386,16 @@ public class ListenThread extends Thread {
 
                     String message = request.getMessage();
                     switch (message.toUpperCase()) {
+
+                        // <editor-fold defaultstate="collapsed" desc="SIGNOUT">
                         case "SIGNOUT": {
                             // Xóa user đã offline khỏi ds user đang online
                             removeMemberDisconnect(getMember());
                             break;
                         }
+                        // </editor-fold>
 
+                        // <editor-fold defaultstate="collapsed" desc="DISCONNECT">
                         case "DISCONNECT": {
                             System.err.println("Client with port " + clientSocket.getPort() + " with disconnect");
                             accept_disconnect();
@@ -410,32 +414,40 @@ public class ListenThread extends Thread {
                             ServerUI.reloadClientDisconnect(this);
                             break;
                         }
+                        // </editor-fold>
 
+                        // <editor-fold defaultstate="collapsed" desc="DOWNLOAD_FILE">
                         case "DOWNLOAD_FILE": {
                             System.out.println("Client đòi " + message);
                             FileDownloadInfo fileDownloadInfo = (FileDownloadInfo) request.getObject();
                             responseDownloadFile("accept_download_file", fileDownloadInfo);
                             break;
                         }
+                        // </editor-fold>
 
+                        // <editor-fold defaultstate="collapsed" desc="UPLOAD_FILE">
                         case "UPLOAD_FILE": {
                             System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
                             Files filesInfo = (Files) request.getObject();
                             FileEvent fileEvent = (FileEvent) request.getFileUpload();
                             new FileBLL().insertNewFile(filesInfo);
                             saveFile(fileEvent);
+                            break;
                         }
-                        break;
+                        // </editor-fold>
 
+                        // <editor-fold defaultstate="collapsed" desc="UPLOAD_FILE_SHARE">
                         case "UPLOAD_FILE_SHARE": {
                             System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
                             Files filesInfo = (Files) request.getObject();
                             FileEvent fileEvent = (FileEvent) request.getFileUpload();
                             new FileBLL().insertNewFileShare(filesInfo);
                             saveFile(fileEvent);
+                            break;
                         }
-                        break;
+                        // </editor-fold>
 
+                        // <editor-fold defaultstate="collapsed" desc="NOTIFICATION">
                         // bắn thông báo về cho client bằng id or email
                         case "NOTIFICATION": {
                             System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
@@ -443,7 +455,9 @@ public class ListenThread extends Thread {
                             notification(email);
                             break;
                         }
+                        // </editor-fold>
 
+                        // <editor-fold defaultstate="collapsed" desc="VERIFY_REGISTER">
                         // CASE ĐĂNG KÝ
                         case "VERIFY_REGISTER": {
                             System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
@@ -452,6 +466,9 @@ public class ListenThread extends Thread {
                             response("response_verify_register", result);
                             break;
                         }
+                        // </editor-fold>
+
+                        // <editor-fold defaultstate="collapsed" desc="REGISTER">
                         case "REGISTER": {
                             System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
 
@@ -460,7 +477,9 @@ public class ListenThread extends Thread {
                             response("response_register", result);
                             break;
                         }
+                        // </editor-fold>
 
+                        // <editor-fold defaultstate="collapsed" desc="AUTHENTICATE">
                         // CASE LOGIN
                         case "AUTHENTICATE": {
                             System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
@@ -489,7 +508,9 @@ public class ListenThread extends Thread {
                             }
                             break;
                         }
+                        // </editor-fold>
 
+                        // <editor-fold defaultstate="collapsed" desc="AUTHENTICATE_ANONYMOUS_PERMISSION">
                         case "AUTHENTICATE_ANONYMOUS_PERMISSION": {
                             System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
 
@@ -503,7 +524,52 @@ public class ListenThread extends Thread {
                             }
                             break;
                         }
+                        // </editor-fold>
 
+                        // <editor-fold defaultstate="collapsed" desc="RELOAD_WITH_AUTHENTICATE">
+                        // CASE RELOAD WITH USER AUTHENTICATE
+                        case "RELOAD_WITH_AUTHENTICATE": {
+                            System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
+
+                            Users user = (Users) request.getObject();
+                            UserBLL userBLL = new UserBLL();
+                            HandleResult result = userBLL.authenticate(user);
+                            response("response_authenticate", result);
+                            if (result.isSuccessed()) {
+                                // user ko bị lock quyền anonymous
+                                if (result.getUser().getAnonymousPermission().trim().equals("unlock")) {
+                                    responseHandleResult(userBLL
+                                            .getAuthenData(result.getFolder().getFolderId(), result.getUser().getEmail()));
+                                    responseHandleResult(userBLL.getAuthenDataShare(result.getUser().getEmail()));
+
+                                } else {    // user bị lock quyền anonymous
+                                    responseHandleResult(userBLL
+                                            .getAuthenDataLockAnonymous(result.getFolder().getFolderId(), result.getUser().getEmail()));
+                                    responseHandleResult(userBLL.getAuthenDataShare(result.getUser().getEmail()));
+
+                                }
+                            }
+                            break;
+                        }
+                        // </editor-fold>
+
+                        // <editor-fold defaultstate="collapsed" desc="RELOAD_WITH_ANONYMOUS">
+                        case "RELOAD_WITH_ANONYMOUS": {
+                            System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
+
+                            String anonymousUser = (String) request.getObject();
+                            HandleResult result = new UserBLL()
+                                    .authenticateWithAnonymousPermission(anonymousUser);
+                            response("response_authenticate_anonymous", result);
+                            if (result.isSuccessed()) {
+                                responseHandleResult(new UserBLL()
+                                        .getAuthenDataWithAnonymousPermission());
+                            }
+                            break;
+                        }
+                        // </editor-fold>
+
+                        // <editor-fold defaultstate="collapsed" desc="NEW_FOLDER">
                         // CASE TẠO FOLDER CON MỚI
                         case "NEW_FOLDER": {
                             System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
@@ -511,7 +577,9 @@ public class ListenThread extends Thread {
                             new FolderBLL().generateFolderChild(folder);
                             break;
                         }
+                        // </editor-fold>
 
+                        // <editor-fold defaultstate="collapsed" desc="SHARE_FILES">
                         case "SHARE_FILES": {
                             System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
                             DataShare dataShare = (DataShare) request.getObject();
@@ -520,7 +588,9 @@ public class ListenThread extends Thread {
                             notificationShared(dataShare.getListUserShare(), notifiShareFile);
                             break;
                         }
+                        // </editor-fold>
 
+                        // <editor-fold defaultstate="collapsed" desc="SHARE_FOLDER">
                         case "SHARE_FOLDER": {
                             System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
                             DataShare dataShare = (DataShare) request.getObject();
@@ -530,6 +600,7 @@ public class ListenThread extends Thread {
                             notificationShared(dataShare.getListUserShare(), notifiShareFolder);
                             break;
                         }
+                        // </editor-fold>
 
                         default: {
                             System.out.println("Client[port " + getSocket().getPort() + "] said default: " + message);

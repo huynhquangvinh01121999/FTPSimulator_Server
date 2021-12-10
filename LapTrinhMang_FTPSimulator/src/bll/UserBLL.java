@@ -55,8 +55,8 @@ public class UserBLL {
             folder.setFolderName("anonymous");
             folder.setFolderPath(desPath);
             folder.setEmail("anonymous");
-            folder.setSize("1,073,741,824");    // 1GB
-            folder.setRemainingSize("1,073,741,824"); // 1GB
+            folder.setSize("1073741824");    // 1GB
+            folder.setRemainingSize("1073741824"); // 1GB
             folder.setCreateAt(DateHelper.Now());
             folder.setFolderUserPermission("unlock");
             
@@ -77,8 +77,8 @@ public class UserBLL {
         folder.setFolderName(prefixEmail);
         folder.setFolderPath(desPath);
         folder.setEmail(user.getEmail());
-        folder.setSize("1,073,741,824");    // 1GB
-        folder.setRemainingSize("1,073,741,824"); // 1GB
+        folder.setSize("1073741824");    // 1GB
+        folder.setRemainingSize("1073741824"); // 1GB
         folder.setCreateAt(DateHelper.Now());
         
         boolean generateFolder = FileExtensions.generateFolder(desPath); // tạo folder trong server

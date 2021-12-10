@@ -36,10 +36,10 @@ public class FileBLL {
         String remainingSizeFolder = new FolderServices().GetRemainingSizeFolder(file.getFolderId());
         Files fileExist = fileService.FindByNameAndSourcePath(file.getFileName(), file.getSourcePath());
         if (fileExist != null) {
-            int remainingSizeFolderConvert
-                    = Integer.parseInt(remainingSizeFolder.replaceAll(",", ""))
-                    + Integer.parseInt(fileExist.getFileSize().replaceAll(",", ""))
-                    - Integer.parseInt(file.getFileSize().replaceAll(",", ""));
+            double remainingSizeFolderConvert
+                    = Double.parseDouble(remainingSizeFolder.replaceAll(",", ""))
+                    + Double.parseDouble(fileExist.getFileSize().replaceAll(",", ""))
+                    - Double.parseDouble(file.getFileSize().replaceAll(",", ""));
             try {
                 new FolderServices().
                         UpdateRemainingSize(String.valueOf(remainingSizeFolderConvert), file.getFolderId());
@@ -48,9 +48,10 @@ public class FileBLL {
             }
             return fileService.UpdateFileIsExist(file);
         }
-        int remainingSizeFolderConvert
-                = Integer.parseInt(remainingSizeFolder.replaceAll(",", ""))
-                - Integer.parseInt(file.getFileSize().replaceAll(",", ""));
+
+        double remainingSizeFolderConvert
+                = Double.parseDouble(remainingSizeFolder.replaceAll(",", ""))
+                - Double.parseDouble(file.getFileSize().replaceAll(",", ""));
         try {
             new FolderServices().
                     UpdateRemainingSize(String.valueOf(remainingSizeFolderConvert), file.getFolderId());
@@ -71,9 +72,24 @@ public class FileBLL {
 
     public boolean insertNewFileShare(Files file) {
         String remainingSizeFolder = new FolderServices().GetRemainingSizeFolder(file.getFolderId());
-        int remainingSizeFolderConvert
-                = Integer.parseInt(remainingSizeFolder.replaceAll(",", ""))
-                - Integer.parseInt(file.getFileSize().replaceAll(",", ""));
+        Files fileExist = fileService.FindByNameAndSourcePath(file.getFileName(), file.getSourcePath());
+        if (fileExist != null) {
+            double remainingSizeFolderConvert
+                    = Double.parseDouble(remainingSizeFolder.replaceAll(",", ""))
+                    + Double.parseDouble(fileExist.getFileSize().replaceAll(",", ""))
+                    - Double.parseDouble(file.getFileSize().replaceAll(",", ""));
+            try {
+                new FolderServices().
+                        UpdateRemainingSize(String.valueOf(remainingSizeFolderConvert), file.getFolderId());
+            } catch (Exception e) {
+                System.err.println("Xảy ra lỗi khi update dung lượng còn lại của folder" + e);
+            }
+            return fileService.UpdateFileIsExist(file);
+        }
+        
+        double remainingSizeFolderConvert
+                = Double.parseDouble(remainingSizeFolder.replaceAll(",", ""))
+                - Double.parseDouble(file.getFileSize().replaceAll(",", ""));
         try {
             new FolderServices().
                     UpdateRemainingSize(String.valueOf(remainingSizeFolderConvert), file.getFolderId());

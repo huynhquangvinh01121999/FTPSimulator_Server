@@ -136,10 +136,9 @@ public class FileExtensions {
 
     // lấy ra tên file từ file chỉ định
     public static String getFileName(File file) {
-        String sourceFilePath = replaceBackslashes(file.getAbsolutePath());
-        return sourceFilePath.substring(sourceFilePath.lastIndexOf("/") + 1, sourceFilePath.length());
-        //        String[] subFilePath = sourceFilePath.split("/");
-        //        return subFilePath[subFilePath.length - 1];
+//        String sourceFilePath = replaceBackslashes(file.getAbsolutePath());
+//        return sourceFilePath.substring(sourceFilePath.lastIndexOf("/") + 1, sourceFilePath.length());
+        return file.getName();
     }
 
     // build

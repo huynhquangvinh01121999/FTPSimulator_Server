@@ -6,6 +6,7 @@ import dal.Services.FolderServices;
 import java.awt.CardLayout;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -29,10 +30,14 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
 
     // CONSTRUCTOR
     private final UserBLL userBLL = new UserBLL();
+    private final FolderBLL folderBLL = new FolderBLL();
 
     // LIST DATA
     private static List<ListenThread> listenThread = new ArrayList<>();
     private static List<Folders> folderChildOfUser = new ArrayList<>();
+
+    // 1MB
+    private static double CONSTANT_1_MB = 1048576;
 
     public ServerUI() {
         initComponents();
@@ -48,14 +53,14 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         loadDataUserPermissionModel();
 
         userBLL.genarateAnonymous();
-        
+
         // set edit table
         setDefaultEditorTable();
     }
-    
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="set edit table">
-    private void setDefaultEditorTable(){
+    private void setDefaultEditorTable() {
         tblUserSetting.setDefaultEditor(Object.class, null);
         tblAllUserOfUserPermission.setDefaultEditor(Object.class, null);
         tblFolderOwnOfUser.setDefaultEditor(Object.class, null);
@@ -86,9 +91,9 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
     private void setDefaultTableModel() {
         tblUserSettingModel = (DefaultTableModel) tblUserSetting.getModel();
         tblUserSettingModel.setColumnIdentifiers(new Object[]{
-            "Email", "Trạng thái", "Max size upload", "Max size download", "Quyền", "Quyền rút gọn"
+            "Email", "Trạng thái", "Dung lượng lưu trữ", "Max size upload", "Max size download", "Quyền", "Quyền rút gọn"
         });
-        hiddenColumn(tblUserSetting, 5);
+        hiddenColumn(tblUserSetting, 6);
 
         tblClientConnectAnonymousSettingsModel = (DefaultTableModel) tblClientConnectAnonymousSettings.getModel();
         tblClientConnectAnonymousSettingsModel.setColumnIdentifiers(new Object[]{
@@ -122,8 +127,9 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             tblUserSettingModel.addRow(new Object[]{
                 user.getEmail().trim(),
                 user.getStatus().trim().equals("unlock") ? "Active" : "Bị khóa",
-                Long.parseLong(user.getFileSizeUpload().trim()) / 1024 + "KB",
-                Long.parseLong(user.getFileSizeDownload().trim()) / 1024 + "KB",
+                String.format("%,.1f", Double.parseDouble(folderBLL.getFolderSize(user.getEmail().trim()).replaceAll(",", "")) / CONSTANT_1_MB) + " MB",
+                String.format("%,.1f", Double.parseDouble(user.getFileSizeUpload().trim()) / CONSTANT_1_MB) + " MB",
+                String.format("%,.1f", Double.parseDouble(user.getFileSizeDownload().trim()) / CONSTANT_1_MB) + " MB",
                 user.getPermissionId().trim().equals("all") ? "All"
                 : (user.getPermissionId().trim().equals("u") ? "Chỉ được phép upload"
                 : (user.getPermissionId().trim().equals("d") ? "Chỉ được phép download" : "Chỉ được phép đọc")),
@@ -175,9 +181,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
@@ -273,20 +277,16 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         pnlMain.add(jLabel4);
         jLabel4.setBounds(465, 0, 270, 30);
 
-        jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon-help-25.png"))); // NOI18N
-        pnlMain.add(jLabel6);
-        jLabel6.setBounds(990, 0, 40, 30);
-
         jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon-setting-25.png"))); // NOI18N
+        jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon-minimize-window-25.png"))); // NOI18N
+        jLabel7.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jLabel7.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel7MouseClicked(evt);
+            }
+        });
         pnlMain.add(jLabel7);
         jLabel7.setBounds(1030, 0, 40, 30);
-
-        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon-notification-25.png"))); // NOI18N
-        pnlMain.add(jLabel8);
-        jLabel8.setBounds(950, 0, 40, 30);
 
         jLabel1.setFont(new java.awt.Font("Trebuchet MS", 1, 13)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -1014,7 +1014,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             Message("Vui lòng chọn user cần lock chức năng upload.!!!");
         } else {
             String email = tblUserSetting.getValueAt(selectedRow, 0).toString();
-            String perId = tblUserSetting.getValueAt(selectedRow, 5).toString();
+            String perId = tblUserSetting.getValueAt(selectedRow, 6).toString();
             switch (perId) {
                 case "all": {
                     try {
@@ -1055,7 +1055,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             Message("Vui lòng chọn user cần mở khóa chức năng upload.!!!");
         } else {
             String email = tblUserSetting.getValueAt(selectedRow, 0).toString();
-            String perId = tblUserSetting.getValueAt(selectedRow, 5).toString();
+            String perId = tblUserSetting.getValueAt(selectedRow, 6).toString();
             switch (perId) {
                 case "d": {
                     try {
@@ -1096,7 +1096,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             Message("Vui lòng chọn user cần lock chức năng download.!!!");
         } else {
             String email = tblUserSetting.getValueAt(selectedRow, 0).toString();
-            String perId = tblUserSetting.getValueAt(selectedRow, 5).toString();
+            String perId = tblUserSetting.getValueAt(selectedRow, 6).toString();
             switch (perId) {
                 case "all": {
                     try {
@@ -1137,7 +1137,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             Message("Vui lòng chọn user cần mở khóa chức năng download.!!!");
         } else {
             String email = tblUserSetting.getValueAt(selectedRow, 0).toString();
-            String perId = tblUserSetting.getValueAt(selectedRow, 5).toString();
+            String perId = tblUserSetting.getValueAt(selectedRow, 6).toString();
             switch (perId) {
                 case "u": {
                     try {
@@ -1277,7 +1277,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
 
         String email = tblAllUserOfUserPermission.getValueAt(selectedRow, 0).toString();
 
-        FolderUserItem folderUserItem = new FolderBLL().GetListFolderChildUser(email);
+        FolderUserItem folderUserItem = folderBLL.GetListFolderChildUser(email);
 
         tblFolderOwnOfUserModel.setRowCount(0);
         if (folderUserItem != null) {
@@ -1297,7 +1297,6 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         if (selectedRow == -1) {
             Message("Vui lòng chọn thư mục mà bạn muốn\nvô hiệu hóa quyền user của thư mục.!!!");
         } else {
-            FolderBLL folderBLL = new FolderBLL();
             String folderId = tblFolderOwnOfUser.getValueAt(selectedRow, 0).toString();
             String folderName = tblFolderOwnOfUser.getValueAt(selectedRow, 1).toString();
             String email = tblFolderOwnOfUser.getValueAt(selectedRow, 2).toString();
@@ -1338,7 +1337,6 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         if (selectedRow == -1) {
             Message("Vui lòng chọn thư mục mà bạn muốn\nkích hoạt quyền user của thư mục.!!!");
         } else {
-            FolderBLL folderBLL = new FolderBLL();
             String folderId = tblFolderOwnOfUser.getValueAt(selectedRow, 0).toString();
             String folderName = tblFolderOwnOfUser.getValueAt(selectedRow, 1).toString();
             String email = tblFolderOwnOfUser.getValueAt(selectedRow, 2).toString();
@@ -1346,7 +1344,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             // tiến hành update giá trị FolderUserPermission = 'unlock' cho folder con của user:
             // + update trên Table
             tblFolderOwnOfUserModel.setValueAt("Cho phép", selectedRow, 3);
-            
+
             // + update folder đc chọn trên database
             folderBLL.UpdateFolderUserPermission(folderId, "unlock");
 
@@ -1382,9 +1380,9 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
         } else {
             String email = tblUserSetting.getValueAt(selectedRow, 0).toString();
             long value = (long) jSpinner3.getValue();
-            Folders folder = new FolderBLL().getFolderIdByEmail(email);
+            Folders folder = folderBLL.getFolderIdByEmail(email);
             if (folder != null) {
-                new FolderBLL().UpdateFolderSize(folder, value);
+                folderBLL.UpdateFolderSize(folder, value);
                 loadDataUserSettingModel();
                 // bắn socket message qua client
                 handleUpdateDataClientThread(email, "update_folder_size_user", String.valueOf(value));
@@ -1392,6 +1390,10 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
             }
         }
     }//GEN-LAST:event_btnUpdateCapacityUpload1ActionPerformed
+
+    private void jLabel7MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel7MouseClicked
+        this.setState(JFrame.ICONIFIED);
+    }//GEN-LAST:event_jLabel7MouseClicked
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Gửi data update qua cho user đc chỉ định email trước">
@@ -1489,9 +1491,7 @@ public class ServerUI extends javax.swing.JFrame implements Runnable {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;

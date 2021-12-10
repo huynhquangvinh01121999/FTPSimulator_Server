@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package middlewares;
 
 import bll.helpers.ThreadRandoms;
@@ -31,28 +27,33 @@ public class HandleVerify {
             return new HandleResult(true);
         }
         return new HandleResult(false, "Tài khoản đã bị khóa");
-
     }
 
     // func verify for register
     public static HandleResult verifyRegisterUser(Users user) {
         if (Validations.isEmail(user.getEmail())) {
-            if (Validations.isPassword(user.getPassword())) {
-                if (Validations.isName(user.getFullName())) {
-                    if (!existedEmail(user.getEmail())) {
-                        int verifyCode = ThreadRandoms.generateCode(); // random ra 1 verify code
-                        try {
-                            new SendMail(verifyCode, new MailSender(user.getEmail()));
-                            return new HandleResult(true, "Một mã xác thực vừa được gửi đến email của bạn!!!", verifyCode);
-                        } catch (Exception ex) {
-                            return new HandleResult(false, "Gửi mail thất bại!!!" + ex);
+            if (!user.getEmail().trim().toLowerCase().equals("anonymous@gmail.com")) {
+                if (Validations.isPassword(user.getPassword())) {
+                    if (Validations.isName(user.getFullName())) {
+                        if (!user.getFullName().trim().toLowerCase().equals("anonymous")) {
+                            if (!existedEmail(user.getEmail())) {
+                                int verifyCode = ThreadRandoms.generateCode(); // random ra 1 verify code
+                                try {
+                                    new SendMail(verifyCode, new MailSender(user.getEmail()));
+                                    return new HandleResult(true, "Một mã xác thực vừa được gửi đến email của bạn!!!", verifyCode);
+                                } catch (Exception ex) {
+                                    return new HandleResult(false, "Gửi mail thất bại!!!" + ex);
+                                }
+                            }
+                            return new HandleResult(false, "Email đã tồn tại!!!");
                         }
+                        return new HandleResult(false, "Tên người dùng không hợp lệ.\nVui lòng không sử dụng tên người dùng là anonymous.");
                     }
-                    return new HandleResult(false, "Email đã tồn tại!!!");
+                    return new HandleResult(false, "Họ và tên không được bỏ trống!!!");
                 }
-                return new HandleResult(false, "Họ và tên không được bỏ trống!!!");
+                return new HandleResult(false, "Tối thiểu 8 ký tự, ít nhất một chữ cái và một số!!!");
             }
-            return new HandleResult(false, "Tối thiểu 8 ký tự, ít nhất một chữ cái và một số!!!");
+            return new HandleResult(false, "Không được phép sử dụng email có tiền tố là anonymous!!!");
         }
         return new HandleResult(false, "Email không đúng định dạng!!!");
     }

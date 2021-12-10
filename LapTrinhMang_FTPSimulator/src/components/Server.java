@@ -59,7 +59,7 @@ public class Server {
             System.out.println("Server is waiting for client on port " + port
                     + "...");
 
-            executor = Executors.newFixedThreadPool(4);
+            executor = Executors.newFixedThreadPool(10);
             executor.execute(new ServerUI());
             listenClientConnect();
         } catch (IOException ex) {

@@ -71,8 +71,12 @@ public class FolderBLL {
     public Folders getFolderIdByEmail(String email) {
         return new FolderServices().FindFolderParentByEmail(email);
     }
+    
+    public String getFolderSize(String email){
+        return getFolderIdByEmail(email).getSize().trim();
+    }
 
-    public void UpdateFolderSize(Folders folder, long size) {
+    public void UpdateFolderSize(Folders folder, double size) {
         FolderServices folderServices = new FolderServices();
         // lấy ra dung lượng lưu trữ cũ của folder
         String oldSize = folder.getSize().replaceAll(",", "");
@@ -81,11 +85,11 @@ public class FolderBLL {
         String oldRemanningSize = folder.getRemainingSize().replaceAll(",", "");
 
         // lấy ra kích thước folder đã sử dụng
-        String usedSize = String.valueOf(Long.parseLong(oldSize) - Long.parseLong(oldRemanningSize));
+        String usedSize = String.valueOf(Double.parseDouble(oldSize) - Double.parseDouble(oldRemanningSize));
 
         // cập nhật dung lượng còn lại cho folder của user
-        String newRemanningSize = String.valueOf(size - Long.parseLong(usedSize));
-        if (Long.parseLong(newRemanningSize) <= 0) {  // nếu âm -> gán = 0 luôn
+        String newRemanningSize = String.valueOf(size - Double.parseDouble(usedSize));
+        if (Double.parseDouble(newRemanningSize) <= 0) {  // nếu âm -> gán = 0 luôn
             folderServices.UpdateRemainingSize("0", folder.getFolderId());
         } else {
             folderServices.UpdateRemainingSize(newRemanningSize, folder.getFolderId());
