@@ -9,6 +9,8 @@ import java.util.regex.Matcher;
  */
 public class Validations {
 
+    private static String regex = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$";
+    
     private static final Pattern VALID_EMAIL_REGEX
             = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
@@ -39,9 +41,13 @@ public class Validations {
         return matcher.find();
     }
 
+//    public static boolean isPassword(String passStr) {
+//        Matcher matcher = VALID_PASSWORD_REGEX.matcher(passStr);
+//        return matcher.find();
+//    }
+    
     public static boolean isPassword(String passStr) {
-        Matcher matcher = VALID_PASSWORD_REGEX.matcher(passStr);
-        return matcher.find();
+        return passStr.matches(regex);
     }
 
 //    public static boolean isName(String nameStr) {
@@ -61,7 +67,7 @@ public class Validations {
     }
 
     public static void main(String[] args) {
-//        Tối thiểu tám ký tự, ít nhất một chữ cái và một số
-        System.out.println(Validations.isName(null));
+//        Tối thiểu tám ký tự, ít nhất một chữ cái , một số, một ký tự in hoa, một ký tự đặc biệt (nếu có)
+        System.out.println(isPassword("1Huynhquangvinh"));
     }
 }

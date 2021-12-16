@@ -1,4 +1,3 @@
-
 package middlewares;
 
 import bll.helpers.ThreadRandoms;
@@ -51,7 +50,7 @@ public class HandleVerify {
                     }
                     return new HandleResult(false, "Họ và tên không được bỏ trống!!!");
                 }
-                return new HandleResult(false, "Tối thiểu 8 ký tự, ít nhất một chữ cái và một số!!!");
+                return new HandleResult(false, "Tối thiểu tám ký tự.\nÍt nhất một chữ cái , một số, một ký tự in hoa, một ký tự đặc biệt (nếu có)!!!");
             }
             return new HandleResult(false, "Không được phép sử dụng email có tiền tố là anonymous!!!");
         }
