@@ -27,12 +27,13 @@ public class HandleResult implements Serializable {
     private List<Permissions> ListPermissionses;
     private List<FileShares> ListFileShared;
     private List<FolderShares> ListFolderShared;
+    private List<Users> ListUsers;
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Dùng cho authenticate">
     // 4 tham số: IsSuccessed - Message - User - Folder
     public HandleResult(boolean IsSuccessed, String Message, Users User,
-            Folders Folder) {
+                        Folders Folder) {
         this.IsSuccessed = IsSuccessed;
         this.Message = Message;
         this.User = User;
@@ -47,8 +48,8 @@ public class HandleResult implements Serializable {
 
     // 3 tham số: ListFileShareses - ListFolderShareses - ListPermissionses
     public HandleResult(List<FileShares> ListFileShared, List<FolderShares> ListFolderShared,
-            List<Files> ListFileShareses, List<Folders> ListFolderShareses,
-            List<Permissions> ListPermissionses) {
+                        List<Files> ListFileShareses, List<Folders> ListFolderShareses,
+                        List<Permissions> ListPermissionses) {
         this.ListFileShared = ListFileShared;
         this.ListFolderShared = ListFolderShared;
         this.ListFileShareses = ListFileShareses;
@@ -80,12 +81,25 @@ public class HandleResult implements Serializable {
     public HandleResult(boolean IsSuccessed) {
         this.IsSuccessed = IsSuccessed;
     }
+    
+    // fetch Users
+    public HandleResult(List<Users> listUsers){
+        this.ListUsers = listUsers;
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Set - Get methods">
 
     public List<Permissions> getListPermissionses() {
         return ListPermissionses;
+    }
+
+    public List<Users> getListUsers() {
+        return ListUsers;
+    }
+
+    public void setListUsers(List<Users> ListUsers) {
+        this.ListUsers = ListUsers;
     }
 
     public List<FileShares> getListFileShared() {

@@ -430,7 +430,10 @@ public class ListenThread extends Thread {
                             System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
                             Files filesInfo = (Files) request.getObject();
                             FileEvent fileEvent = (FileEvent) request.getFileUpload();
+
                             new FileBLL().insertNewFile(filesInfo);
+
+                            // convert byte sang file -> lại file lưu trên server
                             saveFile(fileEvent);
                             break;
                         }
@@ -598,6 +601,16 @@ public class ListenThread extends Thread {
                             new SharesBLL().shareFolder_Dequy(dataShare);
                             String notifiShareFolder = "Bạn vừa được chia sẻ một thư mục từ email " + dataShare.getFromEmail();
                             notificationShared(dataShare.getListUserShare(), notifiShareFolder);
+                            break;
+                        }
+                        // </editor-fold>
+
+                        // <editor-fold defaultstate="collapsed" desc="FETCH_USERS">
+                        case "FETCH_USERS": {
+                            System.out.println("Client[port " + getSocket().getPort() + "] said: " + message);
+                            String authenEmail = (String) request.getObject();
+                            List<Users> listUsers = new UserBLL().getAllUser();
+                            response("fetch_users_success", new HandleResult(listUsers));
                             break;
                         }
                         // </editor-fold>

@@ -43,6 +43,7 @@ public class Server {
 //        }
 //    }
     // </editor-fold>
+    
     private static ExecutorService executor;
     private static ServerSocket serverSocket;
     private static int port;
@@ -59,8 +60,9 @@ public class Server {
             System.out.println("Server is waiting for client on port " + port
                     + "...");
 
-            executor = Executors.newFixedThreadPool(10);
+            executor = Executors.newFixedThreadPool(100);    // giới hạn 10 client
             executor.execute(new ServerUI());
+            
             listenClientConnect();
         } catch (IOException ex) {
             System.err.println("Server socket xảy ra lỗi khi khởi tạo" + ex);
@@ -92,10 +94,12 @@ public class Server {
 //------------------- DANH SÁCH CLIENT CONNECT TỚI SERVER ----------------
     public static void registerClient(ListenThread listenThread) {
         list_Client.add(listenThread);
+        System.out.println("Total client connect: " + list_Client.size());
     }
 
     public static void removeClientDisconnect(ListenThread listenThread) {
         list_Client.remove(listenThread);
+        System.out.println("Total client connect: " + list_Client.size());
     }
 
     public static ArrayList<ListenThread> getListClient() {

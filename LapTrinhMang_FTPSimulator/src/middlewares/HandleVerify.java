@@ -38,6 +38,7 @@ public class HandleVerify {
                             if (!existedEmail(user.getEmail())) {
                                 int verifyCode = ThreadRandoms.generateCode(); // random ra 1 verify code
                                 try {
+                                    // 1. mã code , 2. MailSender
                                     new SendMail(verifyCode, new MailSender(user.getEmail()));
                                     return new HandleResult(true, "Một mã xác thực vừa được gửi đến email của bạn!!!", verifyCode);
                                 } catch (Exception ex) {
@@ -50,7 +51,7 @@ public class HandleVerify {
                     }
                     return new HandleResult(false, "Họ và tên không được bỏ trống!!!");
                 }
-                return new HandleResult(false, "Tối thiểu tám ký tự.\nÍt nhất một chữ cái , một số, một ký tự in hoa, một ký tự đặc biệt (nếu có)!!!");
+                return new HandleResult(false, "Tối thiểu 8 ký tự.\nÍt nhất một chữ cái , một số, một ký tự in hoa, một ký tự đặc biệt (nếu có)!!!");
             }
             return new HandleResult(false, "Không được phép sử dụng email có tiền tố là anonymous!!!");
         }
